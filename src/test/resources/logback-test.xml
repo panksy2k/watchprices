@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Test environment logging configuration -->
+    <!-- This file will be used automatically during tests -->
+
+    <!-- Define pattern for test logs -->
+    <property name="TEST_LOG_PATTERN" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - %msg%n"/>
+
+    <!-- Console Appender for tests - simpler format -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${TEST_LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- Only log WARN and above to console during tests to reduce noise -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <!-- Suppress noisy third-party libraries during tests -->
+    <logger name="io.vertx" level="WARN"/>
+    <logger name="io.netty" level="ERROR"/>
+    <logger name="com.mongodb" level="ERROR"/>
+    <logger name="org.mongodb" level="ERROR"/>
+    <logger name="com.google.inject" level="ERROR"/>
+    
+    <!-- Test containers can be noisy -->
+    <logger name="org.testcontainers" level="INFO"/>
+    <logger name="com.github.dockerjava" level="WARN"/>
+    
+    <!-- Application logging - more verbose for debugging tests -->
+    <logger name="com.affiliation.product" level="DEBUG"/>
+
+    <!-- Root logger for tests -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

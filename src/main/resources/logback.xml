@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <!-- Define properties for log patterns and file locations -->
+  <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+  <property name="LOG_FILE_PATH" value="logs/broadband-stats"/>
+
+  <!-- Console Appender -->
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>${LOG_PATTERN}</pattern>
+    </encoder>
+    <!-- Only log INFO and above to console -->
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>INFO</level>
+    </filter>
+  </appender>
+
+  <!-- File Appender for general application logs -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_FILE_PATH}.log</file>
+    <encoder>
+      <pattern>${LOG_PATTERN}</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <!-- Daily rollover -->
+      <fileNamePattern>${LOG_FILE_PATH}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <!-- Max file size before rolling -->
+      <maxFileSize>10MB</maxFileSize>
+      <!-- Keep 30 days worth of history -->
+      <maxHistory>30</maxHistory>
+      <!-- Total size cap -->
+      <totalSizeCap>1GB</totalSizeCap>
+    </rollingPolicy>
+  </appender>
+
+  <!-- Error File Appender for error-level logs -->
+  <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_FILE_PATH}-error.log</file>
+    <encoder>
+      <pattern>${LOG_PATTERN}</pattern>
+    </encoder>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_FILE_PATH}-error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+      <maxFileSize>10MB</maxFileSize>
+      <maxHistory>30</maxHistory>
+      <totalSizeCap>500MB</totalSizeCap>
+    </rollingPolicy>
+    <!-- Only log ERROR and above -->
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+  </appender>
+
+  <!-- MongoDB Client logging (can be noisy, set to WARN) -->
+  <logger name="io.vertx.ext.mongo" level="WARN"/>
+  <logger name="com.mongodb" level="WARN"/>
+
+  <!-- Vert.x Core logging -->
+  <logger name="io.vertx.core" level="INFO"/>
+  <logger name="io.vertx.ext.web" level="INFO"/>
+
+  <!-- Netty logging (underlying network library) -->
+  <logger name="io.netty" level="WARN"/>
+
+  <!-- Application-specific logging levels -->
+  <logger name="com.affiliation.product" level="INFO"/>
+  <logger name="com.affiliation.product.web" level="INFO"/>
+  <logger name="com.affiliation.product.repository" level="INFO"/>
+
+  <!-- Google Guice dependency injection -->
+  <logger name="com.google.inject" level="WARN"/>
+
+  <!-- Root logger configuration -->
+  <root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+    <appender-ref ref="ERROR_FILE"/>
+  </root>
+
+</configuration>
