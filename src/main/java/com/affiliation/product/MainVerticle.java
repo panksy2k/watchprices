@@ -6,6 +6,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
@@ -18,9 +19,15 @@ import org.slf4j.LoggerFactory;
 public class MainVerticle extends AbstractVerticle {
   private static final Logger logger = LoggerFactory.getLogger(MainVerticle.class);
 
-  // Guice injector
-  private Injector injector;
   private ProductController productController;
+
+  public static void main(String[] args) {
+    Vertx vertx = Vertx.vertx();
+    MainVerticle verticle = new MainVerticle();
+    vertx.deployVerticle(verticle)
+      .onFailure(err -> logger.error(err.getMessage()))
+      .onSuccess(result -> logger.info("Verticle deployed with id: {}", result));
+  }
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -62,7 +69,7 @@ public class MainVerticle extends AbstractVerticle {
     router.route().handler(BodyHandler.create());
 
     // API routes
-    setupApiRoutes(router);
+    setupProductRoutes(router);
     logger.info("API routes configured");
 
     // Serve static files (Vue.js app)
@@ -82,11 +89,6 @@ public class MainVerticle extends AbstractVerticle {
           logger.error("Failed to start HTTP server", http.cause());
         }
       });
-  }
-
-  private void setupApiRoutes(Router router) {
-    // Product API routes using injected ProductController
-    setupProductRoutes(router);
   }
 
   private void setupProductRoutes(Router router) {
