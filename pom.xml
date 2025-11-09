@@ -15,6 +15,7 @@
     <vertx.version>4.5.0</vertx.version>
     <junit.version>5.9.2</junit.version>
     <testcontainers.version>1.19.3</testcontainers.version>
+    <frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
@@ -169,6 +170,42 @@
           <redeploy>true</redeploy>
           <verticle>com.affiliation.product.MainVerticle</verticle>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>${frontend-maven-plugin.version}</version>
+        <configuration>
+          <nodeVersion>v20.19.0</nodeVersion>
+          <npmVersion>10.2.3</npmVersion>
+          <workingDirectory>frontend</workingDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>npm install</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>install</arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>npm run build</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <configuration>
+              <arguments>run build</arguments>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

@@ -7,7 +7,7 @@
           <h1 class="h2 text-primary mb-1">Product Collection</h1>
           <small class="text-muted">
             <i class="bi bi-info-circle me-1"></i>
-            Double-click any row to edit
+            Double-click any row to EDIT
           </small>
         </div>
         <div class="d-flex gap-3 align-items-center">
@@ -195,7 +195,7 @@
         <!-- Results Count -->
         <div class="mb-3">
           <span class="text-muted">
-            {{ products.length }} sports watch{{ products.length !== 1 ? 'es' : '' }} 
+            {{ products.length }} sports watch{{ products.length !== 1 ? 'es' : '' }}
             {{ hasActiveFilters ? 'matching filters' : 'found' }}
           </span>
         </div>
@@ -205,10 +205,10 @@
           <table class="table table-hover table-striped product-table table-sm">
             <thead class="table-dark">
             <tr>
-                <th class="text-nowrap" scope="col">
-                  <i :class="getProductIcon(selectedProductType)" class="me-2"></i>Model
-                </th>
-                <th scope="col">Price</th>
+              <th class="text-nowrap" scope="col">
+                <i :class="getProductIcon(selectedProductType)" class="me-2"></i>Model
+              </th>
+              <th scope="col">Price</th>
 
               <!-- Sports Watch Headers -->
               <th scope="col">Size</th>
@@ -251,69 +251,69 @@
                 </div>
               </td>
 
-                <!-- Price -->
-                <td class="text-success fw-bold">
-                  {{ formatPrice(product.price) }}
-                  <div v-if="product.price?.currency" class="small text-muted">{{ product.price.currency }}</div>
-                </td>
+              <!-- Price -->
+              <td class="text-success fw-bold">
+                {{ formatPrice(product.price) }}
+                <div v-if="product.price?.currency" class="small text-muted">{{ product.price.currency }}</div>
+              </td>
 
               <!-- Sports Watch Columns -->
-                <!-- Display Size -->
-                <td class="display-cell">
-                  <span v-if="product.displaySize" class="spec-badge display-spec">{{ product.displaySize }}</span>
-                  <span v-else class="text-muted fst-italic">N/A</span>
-                </td>
+              <!-- Display Size -->
+              <td class="display-cell">
+                <span v-if="product.displaySize" class="spec-badge display-spec">{{ product.displaySize }}</span>
+                <span v-else class="text-muted fst-italic">N/A</span>
+              </td>
 
-                <!-- Display Resolution -->
-                <td class="display-cell">
+              <!-- Display Resolution -->
+              <td class="display-cell">
                     <span v-if="product.displayResolution" class="spec-badge display-spec">{{
                         product.displayResolution
                       }}</span>
-                  <span v-else class="text-muted fst-italic">N/A</span>
-                </td>
+                <span v-else class="text-muted fst-italic">N/A</span>
+              </td>
 
-                <!-- Battery Life -->
-                <td class="battery-cell">
+              <!-- Battery Life -->
+              <td class="battery-cell">
                     <span v-if="product.batteryLifeDailyUse" class="spec-badge battery-spec">
                       <i class="bi bi-battery-charging me-1"></i>{{ product.batteryLifeDailyUse }}
                     </span>
-                  <span v-else class="text-muted fst-italic">N/A</span>
-                </td>
+                <span v-else class="text-muted fst-italic">N/A</span>
+              </td>
 
-                <!-- Screen Material -->
-                <td class="material-cell">
+              <!-- Screen Material -->
+              <td class="material-cell">
                     <span v-if="product.screenMaterial" class="spec-badge material-spec">{{
                         product.screenMaterial
                       }}</span>
-                  <span v-else class="text-muted fst-italic">N/A</span>
-                </td>
+                <span v-else class="text-muted fst-italic">N/A</span>
+              </td>
 
-                <!-- Phone Connectivity -->
-                <td class="connectivity-cell">
+              <!-- Phone Connectivity -->
+              <td class="connectivity-cell">
                     <span v-if="product.phoneConnectivity" class="spec-badge connectivity-spec">
                       <i class="bi bi-phone me-1"></i>{{ product.phoneConnectivity }}
                     </span>
-                  <span v-else class="text-muted fst-italic">N/A</span>
-                </td>
+                <span v-else class="text-muted fst-italic">N/A</span>
+              </td>
 
-                <!-- Charging Time -->
-                <td class="charging-cell">
+              <!-- Charging Time -->
+              <td class="charging-cell">
                     <span v-if="product.chargingTime" class="spec-badge charging-spec">
                       <i class="bi bi-lightning-charge me-1"></i>{{ product.chargingTime }}
                     </span>
-                  <span v-else class="text-muted fst-italic">N/A</span>
-                </td>
+                <span v-else class="text-muted fst-italic">N/A</span>
+              </td>
 
-                <!-- Internal Memory -->
-                <td class="memory-cell">
+              <!-- Internal Memory -->
+              <td class="memory-cell">
                     <span v-if="product.internalMemory" class="spec-badge memory-spec">
                       <i class="bi bi-hdd me-1"></i>{{ product.internalMemory }}
                     </span>
-                  <span v-else class="text-muted fst-italic">N/A</span>
-                </td>
+                <span v-else class="text-muted fst-italic">N/A</span>
+              </td>
 
-                <!-- Global Maps -->
-                <td class="maps-cell">
+              <!-- Global Maps -->
+              <td class="maps-cell">
                     <span
                       v-if="product.hasDownloadableGlobalMaps !== null && product.hasDownloadableGlobalMaps !== undefined"
                       :class="product.hasDownloadableGlobalMaps ? 'maps-spec-yes' : 'maps-spec-no'"
@@ -322,18 +322,18 @@
                         :class="[product.hasDownloadableGlobalMaps ? 'bi-globe' : 'bi-globe-central-south-asia', 'bi', 'me-1']"></i>
                       {{ product.hasDownloadableGlobalMaps ? 'Yes' : 'No' }}
                     </span>
-                  <span v-else class="text-muted fst-italic">
+                <span v-else class="text-muted fst-italic">
                       <i class="bi bi-question-circle me-1"></i>N/A
                     </span>
-                </td>
+              </td>
 
-                <!-- Water Resistance -->
-                <td class="water-cell">
+              <!-- Water Resistance -->
+              <td class="water-cell">
                     <span v-if="product.waterResistance" class="spec-badge water-spec">
                       <i class="bi bi-droplet me-1"></i>{{ product.waterResistance }}
                     </span>
-                  <span v-else class="text-muted fst-italic">N/A</span>
-                </td>
+                <span v-else class="text-muted fst-italic">N/A</span>
+              </td>
 
               <!-- Weight -->
               <td class="weight-cell">
@@ -518,7 +518,7 @@
           <nav aria-label="Product pagination">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <div class="d-flex align-items-center gap-2">
-                <label for="itemsPerPage" class="form-label mb-0 small">Items per page:</label>
+                <label class="form-label mb-0 small" for="itemsPerPage">Items per page:</label>
                 <select
                   id="itemsPerPage"
                   v-model="itemsPerPage"
@@ -532,7 +532,7 @@
                   <option :value="50">50</option>
                 </select>
               </div>
-              <div class="text-center small text-muted" v-if="totalItems > 0">
+              <div v-if="totalItems > 0" class="text-center small text-muted">
                 <span>Page {{ currentPage }} of {{ totalPages }} | Total: {{ totalItems }} items</span>
               </div>
             </div>
@@ -556,8 +556,8 @@
                     'btn-primary': pageNum === currentPage,
                     'btn-outline-primary': pageNum !== currentPage
                   }"
-                  class="btn btn-sm"
                   :disabled="loading"
+                  class="btn btn-sm"
                   @click="goToPage(pageNum)"
                 >
                   {{ pageNum }}
@@ -584,11 +584,13 @@
                   <i class="bi bi-info-circle me-2"></i>Important Disclosure
                 </h6>
                 <p class="card-text text-muted small lh-base">
-                  As an affiliate marketing initiative, I shall earn from qualifying purchases when it is done via the affiliate link. 
-                  Product prices and availability are accurate as of the date/time indicated and are subject to change. 
-                  Any price and availability information displayed at the time of purchase will apply to the purchase of the product. 
-                  CERTAIN CONTENT THAT APPEARS ON THIS SITE COMES FROM AMAZON SERVICES LLC. 
-                  THIS CONTENT IS PROVIDED 'AS IS' AND IS SUBJECT TO CHANGE OR REMOVAL AT ANY TIME. 
+                  As an affiliate marketing initiative, I shall earn from qualifying purchases when it is done via the
+                  affiliate link.
+                  Product prices and availability are accurate as of the date/time indicated and are subject to change.
+                  Any price and availability information displayed at the time of purchase will apply to the purchase of
+                  the product.
+                  CERTAIN CONTENT THAT APPEARS ON THIS SITE COMES FROM AMAZON SERVICES LLC.
+                  THIS CONTENT IS PROVIDED 'AS IS' AND IS SUBJECT TO CHANGE OR REMOVAL AT ANY TIME.
                   All rights reserved.
                 </p>
               </div>
@@ -649,12 +651,12 @@ export default {
       const halfVisible = Math.floor(maxVisible / 2)
       let start = Math.max(1, this.currentPage - halfVisible)
       let end = Math.min(this.totalPages, start + maxVisible - 1)
-      
+
       // Adjust start if we're near the end
       if (end - start < maxVisible - 1) {
         start = Math.max(1, end - maxVisible + 1)
       }
-      
+
       const pages = []
       for (let i = start; i <= end; i++) {
         pages.push(i)
@@ -693,7 +695,7 @@ export default {
         const url = new URL(`/api/products/${this.selectedProductType}`, window.location.origin)
         url.searchParams.append('page', page)
         url.searchParams.append('limit', this.itemsPerPage)
-        
+
         const response = await fetch(url.toString())
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
@@ -705,21 +707,25 @@ export default {
         // Handle the response structure - it should have productList
         if (data && data.productList) {
           this.products = [...data.productList]
-          
+
           // Extract pagination info from headers
           const hasPagination = response.headers.get('X-APP-PAGINATION')
           if (hasPagination === 'true') {
             const totalPages = response.headers.get('X-APP-PAGINATION-TOTAL-PAGES')
             const totalEntities = response.headers.get('X-APP-PAGINATION-TOTAL-ENTITIES')
-            
+
             if (totalPages) {
               this.totalPages = parseInt(totalPages, 10)
             }
             if (totalEntities) {
               this.totalItems = parseInt(totalEntities, 10)
             }
-            
-            console.log('Pagination info:', { totalPages: this.totalPages, totalItems: this.totalItems, currentPage: this.currentPage })
+
+            console.log('Pagination info:', {
+              totalPages: this.totalPages,
+              totalItems: this.totalItems,
+              currentPage: this.currentPage
+            })
           } else {
             // No pagination headers, calculate based on response
             this.totalItems = this.products.length
@@ -938,7 +944,7 @@ export default {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ criterias })
+            body: JSON.stringify({criterias})
           }
         )
 
