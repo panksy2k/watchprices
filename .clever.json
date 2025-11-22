@@ -1,0 +1,12 @@
+{
+  "apps": [
+    {
+      "app_id": "app_007bf507-eb8e-4e76-9228-7c3ca6d8c58a",
+      "org_id": "user_d39864f4-016f-4377-b57e-cff57f6ecdd6",
+      "deploy_url": "https://push-n3-par-clevercloud-customers.services.clever-cloud.com/app_007bf507-eb8e-4e76-9228-7c3ca6d8c58a.git",
+      "git_ssh_url": "git+ssh://git@push-n3-par-clevercloud-customers.services.clever-cloud.com/app_007bf507-eb8e-4e76-9228-7c3ca6d8c58a.git",
+      "name": "watchprices",
+      "alias": "watchprices"
+    }
+  ]
+}
