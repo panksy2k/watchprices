@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copy the pom.xml file first to leverage Docker caching
 COPY pom.xml .
+COPY frontend frontend
 
 # Download dependencies (this layer will be cached if pom.xml doesn't change)
 RUN mvn dependency:go-offline -B
