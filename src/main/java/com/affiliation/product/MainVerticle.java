@@ -1,6 +1,7 @@
 package com.affiliation.product;
 
 import com.affiliation.product.di.ApplicationModule;
+import com.affiliation.product.web.Auth;
 import com.affiliation.product.web.ProductController;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -20,6 +21,7 @@ public class MainVerticle extends AbstractVerticle {
   private static final Logger logger = LoggerFactory.getLogger(MainVerticle.class);
 
   private ProductController productController;
+  private Auth authController;
 
   public static void main(String[] args) {
     Vertx vertx = Vertx.vertx();
@@ -53,6 +55,10 @@ public class MainVerticle extends AbstractVerticle {
     // Inject ProductController
     productController = injector.getInstance(ProductController.class);
     logger.info("ProductController initialized successfully");
+
+    // Inject AuthController
+    authController = injector.getInstance(Auth.class);
+    logger.info("AuthController initialized successfully");
 
     Router router = Router.router(vertx);
 
@@ -93,7 +99,7 @@ public class MainVerticle extends AbstractVerticle {
 
   private void setupProductRoutes(Router router) {
     // Create new product
-    router.post("/api/products").handler(ctx -> {
+    router.post("/api/secured/products").handler(ctx -> {
       logger.info("POST /api/products - Request body: {}", ctx.body().asString());
       productController.createProduct(ctx)
         .onSuccess(result -> {
@@ -245,6 +251,38 @@ public class MainVerticle extends AbstractVerticle {
             .end(response.encode());
         });
     });
+
+    router.post("/api/auth/signup").handler(ctx -> {
+      JsonObject bodyObject = ctx.body().asJsonObject();
+      String email = bodyObject.getString("email").trim().toLowerCase();
+      String password = bodyObject.getString("password");
+
+      authController.signup(email, password)
+        .onFailure(h -> ctx.fail(h))
+        .onSuccess(h -> {
+          JsonObject response = new JsonObject();
+          response.put("success", true);
+
+          ctx.response().setStatusCode(201).end(response.encode());
+        });
+    });
+
+    router.post("/api/auth/login").handler(ctx -> {
+      JsonObject bodyObject = ctx.body().asJsonObject();
+      String email = bodyObject.getString("email").trim().toLowerCase();
+      String password = bodyObject.getString("password");
+
+      authController.login(email, password)
+        .onFailure(h -> ctx.fail(h))
+        .onSuccess(h -> {
+          JsonObject response = new JsonObject();
+          response.put("token", h);
+
+          ctx.response().setStatusCode(200).end(response.encode());
+        });
+    });
+
+    router.route("/api/secured/*").handler(authController::authenticate);
 
     logger.info("Product API routes configured");
   }
