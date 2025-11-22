@@ -26,7 +26,7 @@ public class AuthController implements Auth {
   @Override
   public Future<Boolean> signup(String email, String password) {
     return userRepository.findUser(email).compose(u -> {
-      if (u != null) {
+      if (u != null && u.getUserId() != null) {
         return Future.failedFuture(new AccessDeniedException("User already exists"));
       }
 

@@ -27,16 +27,61 @@
                 <i class="bi bi-grid-3x3"></i> Product Grid
               </router-link>
             </li>
+            <li class="nav-item" v-if="!isAuthenticated">
+              <router-link to="/login" class="nav-link" active-class="active">
+                <i class="bi bi-box-arrow-in-right"></i> Login
+              </router-link>
+            </li>
+            <li class="nav-item" v-if="!isAuthenticated">
+              <router-link to="/signup" class="nav-link" active-class="active">
+                <i class="bi bi-person-plus"></i> Sign Up
+              </router-link>
+            </li>
+            <li class="nav-item" v-if="isAuthenticated">
+              <a href="#" @click.prevent="logout" class="nav-link">
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </a>
+            </li>
           </ul>
         </div>
       </div>
     </header>
     
     <main>
-      <router-view />
+      <router-view @login="checkAuth" />
     </main>
   </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      isAuthenticated: false
+    };
+  },
+  mounted() {
+    this.checkAuth();
+    // Check auth status on route changes
+    this.$watch(
+      () => this.$route.path,
+      () => {
+        this.checkAuth();
+      }
+    );
+  },
+  methods: {
+    checkAuth() {
+      this.isAuthenticated = !!localStorage.getItem('authToken');
+    },
+    logout() {
+      localStorage.removeItem('authToken');
+      this.isAuthenticated = false;
+      this.$router.push('/login');
+    }
+  }
+};
+</script>
 
 <style scoped>
 #app {

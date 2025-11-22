@@ -24,6 +24,7 @@ import io.vertx.ext.mongo.MongoClient;
  */
 public class ApplicationModule extends AbstractModule {
   private static final String PRODUCT_SPORTS_WATCH_COLLECTION = "SPORTSWATCH";
+  private static final String USER_COLLECTION = "USER";
 
   private final Vertx vertx;
   private final JsonObject mongoConfig;
@@ -59,6 +60,15 @@ public class ApplicationModule extends AbstractModule {
       }
     });
 
+    mc.createCollection(USER_COLLECTION, h -> {
+      if (h.succeeded()) {
+        System.out.println("Created collection " + USER_COLLECTION);
+      } else {
+        System.out.println("Failed to create collection " + USER_COLLECTION);
+        h.cause().printStackTrace();
+      }
+    });
+
     return mc;
   }
 
@@ -83,7 +93,7 @@ public class ApplicationModule extends AbstractModule {
   @Provides
   @Singleton
   public UserRepository provideUserRepository(MongoClient mongoClient, JsonTSportsWatchConverter<User> userConverter) {
-    return new UserRepository(mongoClient, userConverter);
+    return new UserRepository(mongoClient, userConverter, USER_COLLECTION);
   }
 
   @Provides

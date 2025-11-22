@@ -1,6 +1,7 @@
 package com.affiliation.product.repository;
 
 import com.google.inject.Inject;
+import io.netty.util.internal.StringUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -17,9 +18,9 @@ public class UserRepository implements IUserRepository {
 
   @Inject
   // Constructor with mongo client and converter
-  public UserRepository(MongoClient mongoClient, JsonTSportsWatchConverter<User> userConverter) {
+  public UserRepository(MongoClient mongoClient, JsonTSportsWatchConverter<User> userConverter, String collectionName) {
     this.mongoClient = mongoClient;
-    this.collectionName = "Users";
+    this.collectionName = collectionName;
     this.userConverter = userConverter;
   }
 
@@ -57,6 +58,17 @@ public class UserRepository implements IUserRepository {
 
   @Override
   public Future<User> findUser(String email) {
-    return null;
+    if (StringUtil.isNullOrEmpty(email)) {
+      return Future.failedFuture("Email is null or empty - cannot fetch user!");
+    }
+
+    return mongoClient.findOne(this.collectionName, new JsonObject().put("email", email), null)
+      .map(result -> {
+        if (result == null) {
+          return new User(null, null, null, null, null, null);
+        }
+
+        return userConverter.convert(result);
+      });
   }
 }

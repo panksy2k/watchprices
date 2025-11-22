@@ -100,7 +100,7 @@ public class MainVerticle extends AbstractVerticle {
   private void setupProductRoutes(Router router) {
     // Create new product
     router.post("/api/secured/products").handler(ctx -> {
-      logger.info("POST /api/products - Request body: {}", ctx.body().asString());
+      logger.info("POST /api/products - Creating product: {}", ctx.body().asString());
       productController.createProduct(ctx)
         .onSuccess(result -> {
           JsonObject response = new JsonObject()
@@ -175,7 +175,7 @@ public class MainVerticle extends AbstractVerticle {
         });
     });
 
-    router.put("/api/products/:productType/:id").handler(ctx -> {
+    router.put("/api/secured/products/:productType/:id").handler(ctx -> {
       logger.info("PUT /api/products/{}/{} - Updating product", ctx.pathParam("productType"), ctx.pathParam("id"));
 
       productController.updateProduct(ctx).onSuccess(productId -> {
@@ -273,11 +273,15 @@ public class MainVerticle extends AbstractVerticle {
       String password = bodyObject.getString("password");
 
       authController.login(email, password)
-        .onFailure(h -> ctx.fail(h))
+        .onFailure(h -> {
+          logger.info("Login failed for {}", email);
+          ctx.fail(h);
+        })
         .onSuccess(h -> {
           JsonObject response = new JsonObject();
           response.put("token", h);
 
+          logger.info("Login successful by {}", email);
           ctx.response().setStatusCode(200).end(response.encode());
         });
     });
