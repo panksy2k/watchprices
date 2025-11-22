@@ -280,10 +280,17 @@ export default {
                 }
             });
 
-            fetch('/api/products', {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Please login first to add a sports watch.');
+                return;
+            }
+
+            fetch('/api/secured/products', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
                 body: JSON.stringify(formData),
             })

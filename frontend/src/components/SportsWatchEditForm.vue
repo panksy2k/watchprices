@@ -355,10 +355,18 @@ export default {
                     }
                 });
 
-                const response = await fetch(`/api/products/${this.productType}/${this.id}`, {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    alert('Please login first to edit a sports watch.');
+                    this.$router.push('/login');
+                    return;
+                }
+
+                const response = await fetch(`/api/secured/products/${this.productType}/${this.id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
                     },
                     body: JSON.stringify(formData),
                 });
