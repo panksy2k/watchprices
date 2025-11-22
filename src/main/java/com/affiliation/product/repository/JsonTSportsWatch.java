@@ -1,13 +1,21 @@
 package com.affiliation.product.repository;
 
+import io.netty.util.internal.StringUtil;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsonTSportsWatch implements JsonTSportsWatchConverter<SportsWatch> {
+
+  private static final Logger logger = LoggerFactory.getLogger(JsonTSportsWatch.class);
 
   @Override
   public SportsWatch convert(JsonObject document) {
@@ -17,22 +25,22 @@ public class JsonTSportsWatch implements JsonTSportsWatchConverter<SportsWatch> 
 
     try {
       SportsWatch.Builder builder = new SportsWatch.Builder()
-          .id(document.getString("_id"))
-          .modelName(document.getString("modelName"))
-          .description(document.getString("description"))
-          .dimension(document.getString("dimension"))
-          .weight(document.getString("weight"))
-          .displaySize(document.getString("displaySize"))
-          .displayResolution(document.getString("displayResolution"))
-          .displayType(document.getString("displayType"))
-          .screenMaterial(document.getString("screenMaterial"))
-          .dialType(document.getString("dialType"))
-          .phoneConnectivity(document.getString("phoneConnectivity"))
-          .waterResistance(document.getString("waterResistance"))
-          .workingTemperature(document.getString("workingTemperature"))
-          .batteryLifeDailyUse(document.getString("batteryLifeDailyUse"))
-          .chargingTime(document.getString("chargingTime"))
-          .internalMemory(document.getString("internalMemory"));
+        .id(document.getString("_id"))
+        .modelName(document.getString("modelName"))
+        .description(document.getString("description"))
+        .dimension(document.getString("dimension"))
+        .weight(document.getString("weight"))
+        .displaySize(document.getString("displaySize"))
+        .displayResolution(document.getString("displayResolution"))
+        .displayType(document.getString("displayType"))
+        .screenMaterial(document.getString("screenMaterial"))
+        .dialType(document.getString("dialType"))
+        .phoneConnectivity(document.getString("phoneConnectivity"))
+        .waterResistance(document.getString("waterResistance"))
+        .workingTemperature(document.getString("workingTemperature"))
+        .batteryLifeDailyUse(document.getString("batteryLifeDailyUse"))
+        .chargingTime(document.getString("chargingTime"))
+        .internalMemory(document.getString("internalMemory"));
 
       // Handle boolean field
       Boolean hasDownloadableGlobalMaps = document.getBoolean("hasDownloadableGlobalMaps");
@@ -60,10 +68,22 @@ public class JsonTSportsWatch implements JsonTSportsWatchConverter<SportsWatch> 
       }
 
       // Handle JSON arrays
-      builder.dataTrackingSensors(convertJsonArrayToStringList(document.getJsonArray("dataTrackingSensors")))
-             .dailyFeatures(convertJsonArrayToStringList(document.getJsonArray("dailyFeatures")))
-             .thirdPartyIntegrationApps(convertJsonArrayToStringList(document.getJsonArray("thirdPartyIntegrationApps")))
-             .supportedActivities(convertJsonArrayToStringList(document.getJsonArray("supportedActivities")));
+      if (document.getValue("dataTrackingSensors") instanceof JsonArray) {
+        builder.dataTrackingSensors(convertJsonArrayToStringList(document.getJsonArray("dataTrackingSensors")));
+      }
+
+      if (document.getValue("dailyFeatures") instanceof JsonArray) {
+        builder.dailyFeatures(convertJsonArrayToStringList(document.getJsonArray("dailyFeatures")));
+      }
+
+      if (document.getValue("thirdPartyIntegrationApps") instanceof JsonArray) {
+        builder.thirdPartyIntegrationApps(
+          convertJsonArrayToStringList(document.getJsonArray("thirdPartyIntegrationApps")));
+      }
+
+      if (document.getValue("supportedActivities") instanceof JsonArray) {
+        builder.supportedActivities(convertJsonArrayToStringList(document.getJsonArray("supportedActivities")));
+      }
 
       // Handle affiliate URLs
       JsonObject affiliateUrlsJson = document.getJsonObject("affiliateMarketingDeepURL");
@@ -75,19 +95,26 @@ public class JsonTSportsWatch implements JsonTSportsWatchConverter<SportsWatch> 
       return builder.build();
     } catch (Exception e) {
       // Log the error or handle it appropriately
-      System.err.println("Error converting JsonObject to SportsWatch: " + e.getMessage());
+      logger.error("Error converting JsonObject to SportsWatch: {}", e.getMessage());
       return null;
     }
   }
 
-  private List<String> convertJsonArrayToStringList(JsonArray jsonArray) {
-    if (jsonArray == null) {
-      return null;
+  private List<String> convertJsonArrayToStringList(JsonArray jsonObj) {
+    if (jsonObj != null && JsonArray.class.isAssignableFrom(jsonObj.getClass())) {
+
+      List<String> strElements = new ArrayList<>(jsonObj.size());
+
+      jsonObj.stream().map(String::valueOf).forEach(s -> {
+        if (!StringUtil.isNullOrEmpty(s)) {
+          strElements.add(s);
+        }
+      });
+
+      return strElements;
     }
-    return jsonArray.stream()
-        .filter(Objects::nonNull)
-        .map(Object::toString)
-        .collect(Collectors.toList());
+
+    return Collections.emptyList();
   }
 
   private Map<String, URL> convertJsonObjectToUrlMap(JsonObject jsonObject) {
