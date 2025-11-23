@@ -82,6 +82,82 @@
                 </select>
               </div>
 
+              <!-- Charging Time Filter -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Charging Time</label>
+                <select
+                  v-model="selectedChargingTime"
+                  :disabled="loadingFilters"
+                  class="form-select form-select-sm"
+                >
+                  <option value="">{{ loadingFilters ? 'Loading...' : 'All' }}</option>
+                  <option
+                    v-for="option in chargingTimeOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Internal Memory Filter -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Memory</label>
+                <select
+                  v-model="selectedInternalMemory"
+                  :disabled="loadingFilters"
+                  class="form-select form-select-sm"
+                >
+                  <option value="">{{ loadingFilters ? 'Loading...' : 'All' }}</option>
+                  <option
+                    v-for="option in internalMemoryOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Screen Material Filter -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Screen Material</label>
+                <select
+                  v-model="selectedScreenMaterial"
+                  :disabled="loadingFilters"
+                  class="form-select form-select-sm"
+                >
+                  <option value="">{{ loadingFilters ? 'Loading...' : 'All' }}</option>
+                  <option
+                    v-for="option in screenMaterialOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Battery Life Daily Use Filter -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Battery Life</label>
+                <select
+                  v-model="selectedBatteryLifeDailyUse"
+                  :disabled="loadingFilters"
+                  class="form-select form-select-sm"
+                >
+                  <option value="">{{ loadingFilters ? 'Loading...' : 'All' }}</option>
+                  <option
+                    v-for="option in batteryLifeDailyUseOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
               <!-- Filter Actions -->
               <div class="d-grid gap-2">
                 <button
@@ -155,6 +231,18 @@
                       <small class="text-muted d-block">Weight</small>
                       <span class="fw-semibold">{{ product.weight }}</span>
                     </div>
+                    <div v-if="product.internalMemory" class="col-6">
+                      <small class="text-muted d-block">Memory</small>
+                      <span class="fw-semibold">{{ product.internalMemory }}</span>
+                    </div>
+                    <div v-if="product.chargingTime" class="col-6">
+                      <small class="text-muted d-block">Charging Time</small>
+                      <span class="fw-semibold">{{ product.chargingTime }}</span>
+                    </div>
+                    <div v-if="product.screenMaterial" class="col-6">
+                      <small class="text-muted d-block">Screen Material</small>
+                      <span class="fw-semibold">{{ product.screenMaterial }}</span>
+                    </div>
                   </div>
 
                   <!-- Features -->
@@ -174,6 +262,35 @@
                       >
                     +{{ product.supportedActivities.length - 3 }} more
                   </span>
+                    </div>
+                  </div>
+
+                  <!-- Daily Features -->
+                  <div v-if="product.dailyFeatures && product.dailyFeatures.length" class="mt-3">
+                    <small class="text-muted d-block mb-2">Daily Features</small>
+                    <div class="d-flex flex-wrap gap-1">
+                      <span
+                        v-for="feature in product.dailyFeatures"
+                        :key="feature"
+                        class="badge bg-info"
+                      >
+                        {{ feature }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Third-Party Integration -->
+                  <div v-if="product.thirdPartyIntegrationApps && product.thirdPartyIntegrationApps.length"
+                       class="mt-3">
+                    <small class="text-muted d-block mb-2">Integrations</small>
+                    <div class="d-flex flex-wrap gap-1">
+                      <span
+                        v-for="app in product.thirdPartyIntegrationApps"
+                        :key="app"
+                        class="badge bg-warning"
+                      >
+                        {{ app }}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -239,26 +356,29 @@ export default {
       filtersVisible: false,
       selectedWaterResistance: '',
       waterResistanceOptions: [],
-      loadingFilters: false
+      selectedChargingTime: '',
+      chargingTimeOptions: [],
+      selectedInternalMemory: '',
+      internalMemoryOptions: [],
+      selectedScreenMaterial: '',
+      screenMaterialOptions: [],
+      selectedBatteryLifeDailyUse: '',
+      batteryLifeDailyUseOptions: [],
+      loadingFilters: false,
+      filterDebounceTimer: null
     }
   },
   computed: {
     filteredProducts() {
-      let filtered = [...this.products]
-
-      // Apply water resistance filter
-      if (this.selectedWaterResistance) {
-        filtered = filtered.filter(product => {
-          if (!product.waterResistance) return false
-          // Use exact match for more precise filtering
-          return product.waterResistance.toLowerCase() === this.selectedWaterResistance.toLowerCase()
-        })
-      }
-
-      return filtered
+      // Return products fetched from backend based on criteria
+      return this.products
     },
     hasActiveFilters() {
-      return this.selectedWaterResistance !== ''
+      return this.selectedWaterResistance !== '' ||
+        this.selectedChargingTime !== '' ||
+        this.selectedInternalMemory !== '' ||
+        this.selectedScreenMaterial !== '' ||
+        this.selectedBatteryLifeDailyUse !== ''
     },
     averagePrice() {
       if (!this.filteredProducts.length) return 0
@@ -276,9 +396,26 @@ export default {
       return colors.size
     }
   },
+  watch: {
+    selectedWaterResistance() {
+      this.applyFilters()
+    },
+    selectedChargingTime() {
+      this.applyFilters()
+    },
+    selectedInternalMemory() {
+      this.applyFilters()
+    },
+    selectedScreenMaterial() {
+      this.applyFilters()
+    },
+    selectedBatteryLifeDailyUse() {
+      this.applyFilters()
+    }
+  },
   mounted() {
     this.fetchProducts()
-    this.fetchWaterResistanceOptions()
+    this.fetchAllFilterOptions()
   },
   methods: {
     async fetchProducts() {
@@ -311,39 +448,155 @@ export default {
         this.loading = false
       }
     },
-    async fetchWaterResistanceOptions() {
+    async fetchAllFilterOptions() {
       this.loadingFilters = true
+      try {
+        await Promise.all([
+          this.fetchAttributeOptions('waterResistance', 'waterResistanceOptions'),
+          this.fetchAttributeOptions('chargingTime', 'chargingTimeOptions'),
+          this.fetchAttributeOptions('internalMemory', 'internalMemoryOptions'),
+          this.fetchAttributeOptions('screenMaterial', 'screenMaterialOptions'),
+          this.fetchAttributeOptions('batteryLifeDailyUse', 'batteryLifeDailyUseOptions')
+        ])
+      } catch (error) {
+        console.error('Error fetching filter options:', error)
+      } finally {
+        this.loadingFilters = false
+      }
+    },
+    async fetchAttributeOptions(attributeName, optionsProperty) {
+      try {
+        const response = await fetch(`/api/products/${this.productType}/attribute/${attributeName}`)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data = await response.json()
+        let values = []
+        if (data && data[attributeName] && Array.isArray(data[attributeName])) {
+          values = data[attributeName]
+        } else if (Array.isArray(data)) {
+          values = data
+        } else {
+          console.warn(`Unexpected response format for ${attributeName} options:`, data)
+          values = []
+        }
+        this[optionsProperty] = values
+          .filter(value => value && value.trim())
+          .map(value => ({ value, label: value }))
+      } catch (error) {
+        console.error(`Error fetching ${attributeName} options:`, error)
+        this[optionsProperty] = []
+      }
+    },
+    async applyFilters() {
+      // Debounce to avoid too many API calls
+      if (this.filterDebounceTimer) {
+        clearTimeout(this.filterDebounceTimer)
+      }
+
+      this.filterDebounceTimer = setTimeout(async () => {
+        await this.executeFilterQuery()
+      }, 300)
+    },
+    async executeFilterQuery() {
+      // Build criteria array based on selected filters
+      const criterias = []
+
+      if (this.selectedWaterResistance) {
+        criterias.push({
+          col: 'waterResistance',
+          val: [this.selectedWaterResistance],
+          op: 'IN'
+        })
+      }
+
+      if (this.selectedChargingTime) {
+        criterias.push({
+          col: 'chargingTime',
+          val: [this.selectedChargingTime],
+          op: 'IN'
+        })
+      }
+
+      if (this.selectedInternalMemory) {
+        criterias.push({
+          col: 'internalMemory',
+          val: [this.selectedInternalMemory],
+          op: 'IN'
+        })
+      }
+
+      if (this.selectedScreenMaterial) {
+        criterias.push({
+          col: 'screenMaterial',
+          val: [this.selectedScreenMaterial],
+          op: 'IN'
+        })
+      }
+
+      if (this.selectedBatteryLifeDailyUse) {
+        criterias.push({
+          col: 'batteryLifeDailyUse',
+          val: [this.selectedBatteryLifeDailyUse],
+          op: 'IN'
+        })
+      }
+
+      // If no filters selected, fetch all products
+      if (criterias.length === 0) {
+        await this.fetchProducts()
+        return
+      }
+
+      // Make backend call with criteria
+      await this.fetchProductsByCriteria(criterias)
+    },
+    async fetchProductsByCriteria(criterias) {
+      this.loading = true
+      this.error = null
 
       try {
-        const response = await fetch(`/api/products/${this.productType}/attribute/waterResistance`)
+        const response = await fetch(
+          `/api/products/${this.productType}/find/criteria`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ criterias })
+          }
+        )
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }
 
         const data = await response.json()
-        console.log('Water Resistance API Response:', data)
 
-        // Handle the response - it comes as {"waterResistance": ["value1", "value2"]}
-        let values = []
-        if (data && data.waterResistance && Array.isArray(data.waterResistance)) {
-          values = data.waterResistance
+        if (data && data.success && data.data) {
+          if (data.data.productList) {
+            this.products = [...data.data.productList]
+          } else if (Array.isArray(data.data)) {
+            this.products = [...data.data]
+          } else {
+            this.products = []
+          }
+        } else if (data && data.productList) {
+          this.products = [...data.productList]
         } else if (Array.isArray(data)) {
-          values = data
+          this.products = [...data]
         } else {
-          console.warn('Unexpected response format for water resistance options:', data)
-          values = []
+          this.products = []
         }
-        
-        this.waterResistanceOptions = values
-          .filter(value => value && value.trim()) // Filter out null/empty values
-          .map(value => ({value, label: value})) // Convert to options format
 
+        // Force Vue to update
+        this.$forceUpdate()
       } catch (error) {
-        console.error('Error fetching water resistance options:', error)
-        // Fallback to empty array - no filter options will be shown
-        this.waterResistanceOptions = []
+        console.error('Error fetching filtered products:', error)
+        this.error = error.message || 'Failed to apply filters'
+        this.products = []
       } finally {
-        this.loadingFilters = false
+        this.loading = false
       }
     },
     formatPrice(price) {
@@ -388,6 +641,11 @@ export default {
     },
     clearFilters() {
       this.selectedWaterResistance = ''
+      this.selectedChargingTime = ''
+      this.selectedInternalMemory = ''
+      this.selectedScreenMaterial = ''
+      this.selectedBatteryLifeDailyUse = ''
+      this.fetchProducts()
     }
   }
 }

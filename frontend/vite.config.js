@@ -3,5 +3,9 @@ import vue from '@vitejs/plugin-vue'
 
 // https://vite.dev/config/
 export default defineConfig({
+  appType: 'spa',
   plugins: [vue()],
+  server: {
+    port: 8080,
+  }
 })
