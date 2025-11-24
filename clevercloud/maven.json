@@ -1,9 +1,0 @@
-{
-  "build": {
-    "type": "maven",
-    "goal": "clean package -DskipTests"
-  },
-  "deploy": {
-    "goal": "vertx:run"
-  }
-}
