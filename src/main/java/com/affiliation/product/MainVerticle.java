@@ -79,7 +79,14 @@ public class MainVerticle extends AbstractVerticle {
     logger.info("API routes configured");
 
     // Serve static files (Vue.js app)
-    router.route("/*").handler(StaticHandler.create("webroot"));
+    router.route("/*").handler(StaticHandler.create("frontend/dist"));
+
+    // Redirect all non-API traffic to the Vue app's entry point
+    router.get("/*").handler(ctx -> {
+      if (!ctx.request().path().startsWith("/api")) {
+        ctx.response().sendFile("frontend/dist/index.html");
+      }
+    });
     logger.info("Static file handler configured for webroot");
 
     vertx.createHttpServer()
