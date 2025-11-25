@@ -8,7 +8,7 @@ services:
     restart: always
     environment:
       MONGO_INITDB_DATABASE: broadbanddb
-    command: ["mongod", "--logpath", "/var/log/mongodb/mongod.log", "--quiet", "--logappend"]
+    command: [ "mongod", "--logpath", "/var/log/mongodb/mongod.log", "--quiet", "--logappend" ]
     ports:
       - "27017:27017"
     volumes:
@@ -16,40 +16,11 @@ services:
     networks:
       - broadband-stats-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
-
-  # Vert.x application service
-  vertx-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: broadband-stats-app
-    restart: always
-    ports:
-      - "8080:8080"
-    environment:
-      # MongoDB connection settings
-      MONGO_CONNECTION_STRING: mongodb://mongodb:27017
-      MONGO_HOST: mongodb
-      MONGO_PORT: 27017
-      MONGO_DATABASE: broadbanddb
-      # Java runtime options
-      JAVA_OPTS: "-Xmx512m -Xms256m"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - broadband-stats-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
 
 volumes:
   mongodb_data:

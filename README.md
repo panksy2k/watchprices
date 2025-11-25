@@ -12,18 +12,18 @@ This directory contains the Docker Compose configuration to run the Vert.x appli
 The Docker Compose setup includes:
 
 1. **MongoDB** (`mongodb`):
-   - Image: `mongo:7.0`
-   - Port: `27017`
-   - Database: `productdb`
-   - Persistent volume for data storage
-   - Health check to ensure MongoDB is ready
+  - Image: `mongo:7.0`
+  - Port: `27017`
+  - Database: `productdb`
+  - Persistent volume for data storage
+  - Health check to ensure MongoDB is ready
 
 2. **Vert.x Application** (`vertx-app`):
-   - Built from the Dockerfile in the parent directory
-   - Port: `8080`
-   - Depends on MongoDB service
-   - Environment variables for MongoDB connection
-   - Health check on the products API endpoint
+  - Built from the Dockerfile in the parent directory
+  - Port: `8080`
+  - Depends on MongoDB service
+  - Environment variables for MongoDB connection
+  - Health check on the products API endpoint
 
 ## Usage
 
@@ -40,8 +40,11 @@ Or run in detached mode:
 
 ```bash
 docker-compose up --build -d
-docker-compose up mongodb -d
 ```
+
+### Run mongodb (from docker-compose) in detached mode
+
+docker-compose up -d mongodb
 
 ### Stopping the Application
 
@@ -74,7 +77,6 @@ Once running, the following endpoints are available:
 - **Application**: http://localhost:8080
 - **Products API**: http://localhost:8080/api/products
 
-
 ## Health Checks
 
 Both services have health checks configured:
@@ -88,16 +90,19 @@ Both services have health checks configured:
 
 ## Network
 
-All services run on the `broadband-network` bridge network, allowing them to communicate using service names as hostnames.
+All services run on the `broadband-network` bridge network, allowing them to communicate using service names as
+hostnames.
 
 ## Troubleshooting
 
 ### Check service status:
+
 ```bash
 docker-compose ps
 ```
 
 ### View logs:
+
 ```bash
 # All services
 docker-compose logs
@@ -108,25 +113,30 @@ docker-compose logs mongodb
 ```
 
 ### Check health:
+
 ```bash
 docker-compose exec vertx-app curl -f http://localhost:8080/api/products
 docker-compose exec mongodb mongosh --eval "db.adminCommand('ping')"
 ```
 
 ### Rebuild only the application:
+
 ```bash
 docker-compose build vertx-app
 docker-compose up vertx-app
 ```
 
 ### Rebuild frontend after changes to Vue components - which will lcompress and put the assets into frontend/dist:
+
 ```bash
 cd frontend
 npm run build
 ```
 
 ### Package through mvn -- including frontend assets - as it will copy first the assets from frontend/dist to stc/main/resources
+
 ### and then package the binary along with frontend assets:
+
 ```bash
 mvn clean package -DskipTests
 ```
