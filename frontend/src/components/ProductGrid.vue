@@ -526,10 +526,9 @@
                   style="width: auto;"
                   @change="changeItemsPerPage(itemsPerPage)"
                 >
-                  <option :value="5">5</option>
-                  <option :value="10">10</option>
-                  <option :value="25">25</option>
                   <option :value="50">50</option>
+                  <option :value="50">100</option>
+                  <option :value="50">150</option>
                 </select>
               </div>
               <div v-if="totalItems > 0" class="text-center small text-muted">
@@ -628,7 +627,7 @@ export default {
       filterDebounceTimer: null,
       // Pagination state
       currentPage: 1,
-      itemsPerPage: 1,
+      itemsPerPage: 50,
       totalItems: 0,
       totalPages: 0
     }

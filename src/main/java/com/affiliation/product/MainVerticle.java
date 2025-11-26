@@ -95,7 +95,6 @@ public class MainVerticle extends AbstractVerticle {
         if (http.succeeded()) {
           startPromise.complete();
           logger.info("HTTP server started on port 8080");
-          logger.info("Product API available at: http://localhost:8080/api/products");
           logger.info("Vue.js app available at: http://localhost:8080");
         } else {
           startPromise.fail(http.cause());

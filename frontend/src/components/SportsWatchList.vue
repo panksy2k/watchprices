@@ -340,6 +340,11 @@
           </div>
         </div>
       </div>
+
+      <!-- Disclaimer Footer -->
+      <div class="mt-5 pt-4 border-top text-muted small disclaimer-footer">
+        <p>Last updated at {{ lastUpdated }}. As an Amazon Associate I earn from qualifying purchases. Product prices and availability are accurate as of the date/time indicated and are subject to change. Any price and availability information displayed at the time of purchase will apply to the purchase of the product. CERTAIN CONTENT THAT APPEARS ON THIS SITE COMES FROM AMAZON SERVICES LLC. THIS CONTENT IS PROVIDED 'AS IS' AND IS SUBJECT TO CHANGE OR REMOAL AT ANY TIME. All rights reserved.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -365,7 +370,8 @@ export default {
       selectedBatteryLifeDailyUse: '',
       batteryLifeDailyUseOptions: [],
       loadingFilters: false,
-      filterDebounceTimer: null
+      filterDebounceTimer: null,
+      lastUpdated: null
     }
   },
   computed: {
@@ -416,6 +422,7 @@ export default {
   mounted() {
     this.fetchProducts()
     this.fetchAllFilterOptions()
+    this.lastUpdated = new Date().toUTCString()
   },
   methods: {
     async fetchProducts() {
@@ -774,6 +781,12 @@ export default {
   .d-flex.gap-2 .btn {
     width: 100%;
   }
+}
+
+.disclaimer-footer {
+  font-style: italic;
+  font-size: 0.8rem;
+  color: #888;
 }
 
 @media (max-width: 992px) {
