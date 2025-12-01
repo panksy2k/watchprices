@@ -3,9 +3,11 @@ package com.affiliation.product;
 import com.affiliation.product.di.ApplicationModule;
 import com.affiliation.product.web.Auth;
 import com.affiliation.product.web.ProductController;
+import com.affiliation.product.web.WatchFeaturesController;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerResponse;
@@ -22,13 +24,20 @@ public class MainVerticle extends AbstractVerticle {
 
   private ProductController productController;
   private Auth authController;
+  private WatchFeaturesController watchFeaturesController;
 
   public static void main(String[] args) {
     Vertx vertx = Vertx.vertx();
     MainVerticle verticle = new MainVerticle();
     vertx.deployVerticle(verticle)
+      .compose(id -> {
+        //watchFeaturesController.putWatchFeatures();
+        return Future.succeededFuture(true);
+      })
       .onFailure(err -> logger.error(err.getMessage()))
-      .onSuccess(result -> logger.info("Verticle deployed with id: {}", result));
+      .onSuccess(result -> {
+        logger.info("Verticle deployed with success?: {}", result);
+      });
   }
 
   @Override
@@ -59,6 +68,10 @@ public class MainVerticle extends AbstractVerticle {
     // Inject AuthController
     authController = injector.getInstance(Auth.class);
     logger.info("AuthController initialized successfully");
+
+    // Inject WatchFeaturesController
+    watchFeaturesController = injector.getInstance(WatchFeaturesController.class);
+    logger.info("WatchFeaturesController initialized successfully");
 
     Router router = Router.router(vertx);
 
@@ -93,9 +106,15 @@ public class MainVerticle extends AbstractVerticle {
       .requestHandler(router)
       .listen(8080, http -> {
         if (http.succeeded()) {
-          startPromise.complete();
           logger.info("HTTP server started on port 8080");
           logger.info("Vue.js app available at: http://localhost:8080");
+
+          // Initialize watch features data after MongoDB is ready
+          watchFeaturesController.putWatchFeatures()
+            .onSuccess(result -> logger.info("WatchFeaturesController injected static data successfully"))
+            .onFailure(err -> logger.error("Failed to inject watch features data: {}", err.getMessage()));
+
+          startPromise.complete();
         } else {
           startPromise.fail(http.cause());
           logger.error("Failed to start HTTP server", http.cause());
@@ -293,6 +312,21 @@ public class MainVerticle extends AbstractVerticle {
     });
 
     router.route("/api/secured/*").handler(authController::authenticate);
+
+    router.get("/api/secured/products/:productType/:watchFeatures").handler(ctx -> {
+      logger.info("GET /api/secured/products/{}/{} - Fetching watch feature type static data ",
+        ctx.pathParam("productType"), ctx.pathParam("watchFeatures"));
+
+      watchFeaturesController.getFeature(ctx)
+        .onFailure(t -> {
+          logger.error("Could not fetch watch feature type {}", ctx.pathParam("watchFeatures"));
+          ctx.fail(t);
+        })
+        .onSuccess(feature -> {
+          JsonObject response = new JsonObject();
+          response.put(feature.getFeatureName(), feature.getFeatures());
+        });
+    });
 
     logger.info("Product API routes configured");
   }

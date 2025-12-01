@@ -1,17 +1,20 @@
 package com.affiliation.product.di;
 
 import com.affiliation.product.repository.IProductRepository;
+import com.affiliation.product.repository.IWatchFeatures;
 import com.affiliation.product.repository.JsonTSportsWatchConverter;
 import com.affiliation.product.repository.JsonToUserConverter;
 import com.affiliation.product.repository.Product;
 import com.affiliation.product.repository.ProductRepository;
 import com.affiliation.product.repository.User;
 import com.affiliation.product.repository.UserRepository;
+import com.affiliation.product.repository.WatchFeaturesRepository;
 import com.affiliation.product.web.Auth;
 import com.affiliation.product.web.AuthController;
 import com.affiliation.product.web.IToken;
 import com.affiliation.product.web.ProductController;
 import com.affiliation.product.web.TokenService;
+import com.affiliation.product.web.WatchFeaturesController;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -25,6 +28,7 @@ import io.vertx.ext.mongo.MongoClient;
 public class ApplicationModule extends AbstractModule {
   private static final String PRODUCT_SPORTS_WATCH_COLLECTION = "SPORTSWATCH";
   private static final String USER_COLLECTION = "USER";
+  private static final String WATCH_FEATURES = "WatchFeatures";
 
   private final Vertx vertx;
   private final JsonObject mongoConfig;
@@ -108,4 +112,15 @@ public class ApplicationModule extends AbstractModule {
     return new AuthController(userRepository, tokenService);
   }
 
+  @Provides
+  @Singleton
+  public IWatchFeatures provideWatchFeaturesRepository(MongoClient mongoClient) {
+    return new WatchFeaturesRepository(mongoClient, WATCH_FEATURES);
+  }
+
+  @Provides
+  @Singleton
+  public WatchFeaturesController provideWatchFeaturesController(IWatchFeatures watchFeaturesRepository) {
+    return new WatchFeaturesController(watchFeaturesRepository);
+  }
 }

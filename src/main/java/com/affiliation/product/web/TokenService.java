@@ -10,8 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TokenService implements IToken {
+  private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
 
   private Map<String, User> tokens = new HashMap<>();
 
@@ -23,6 +26,7 @@ public class TokenService implements IToken {
     User u = new User(userID, null, null, permissions, expiryDate);
     tokens.put(token, u);
 
+    logger.info("Adding user to token: {}", token);
     return Future.succeededFuture(token);
   }
 
@@ -32,8 +36,11 @@ public class TokenService implements IToken {
       return Future.failedFuture(new AccessDeniedException("Token do not exist!"));
     }
 
+    logger.info("Fetching user from token: {}", token);
+
     User user = tokens.get(token);
     if (user == null) {
+      logger.error("Token do not match {}, {}", token, tokens.keySet());
       return Future.failedFuture(new AccessDeniedException("Invalid credentials/tokens"));
     }
 
