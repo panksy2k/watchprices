@@ -313,18 +313,26 @@ public class MainVerticle extends AbstractVerticle {
 
     router.route("/api/secured/*").handler(authController::authenticate);
 
-    router.get("/api/secured/products/:productType/:watchFeatures").handler(ctx -> {
-      logger.info("GET /api/secured/products/{}/{} - Fetching watch feature type static data ",
-        ctx.pathParam("productType"), ctx.pathParam("watchFeatures"));
+    router.get("/api/products/:productType/watchFeatures/:watchFeatures").handler(ctx -> {
+      String productType = ctx.pathParam("productType");
+      String featureName = ctx.pathParam("watchFeatures");
 
-      watchFeaturesController.getFeature(ctx)
+      logger.info("GET /api/secured/products/{}/{} - Fetching watch feature type static data ",
+        productType, featureName);
+
+      watchFeaturesController.getFeature(productType, featureName)
         .onFailure(t -> {
-          logger.error("Could not fetch watch feature type {}", ctx.pathParam("watchFeatures"));
+          logger.error("Could not fetch watch feature type {}", featureName);
           ctx.fail(t);
         })
         .onSuccess(feature -> {
           JsonObject response = new JsonObject();
           response.put(feature.getFeatureName(), feature.getFeatures());
+
+          ctx.response()
+            .setStatusCode(200)
+            .putHeader("Content-Type", "application/json")
+            .end(response.encode());
         });
     });
 

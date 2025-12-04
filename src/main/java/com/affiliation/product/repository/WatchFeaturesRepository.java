@@ -3,7 +3,6 @@ package com.affiliation.product.repository;
 import com.google.inject.Inject;
 import io.netty.util.internal.StringUtil;
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import java.util.Collections;
@@ -31,16 +30,18 @@ public class WatchFeaturesRepository implements IWatchFeatures {
       return Future.failedFuture("In-sufficient details -- cannot determine what feature to be fetched!");
     }
 
-    return mongoClient.distinctWithQuery(this.collectionName, featureName, JsonArray.class.getName(),
+    return mongoClient.distinctWithQuery(this.collectionName, featureName, String.class.getName(),
         new JsonObject().put("productType", productType.name()))
       .map(ja -> {
         if (ja.isEmpty()) {
+          logger.error("No {} found in documents!", featureName);
           return new WatchFeature(featureName, Collections.emptyList());
         }
 
         List<String> allFeatureValues = ja.stream().map(Object::toString).collect(Collectors.toList());
-        return new WatchFeature(featureName, allFeatureValues);
 
+        logger.info("{} found in documents!", allFeatureValues);
+        return new WatchFeature(featureName, allFeatureValues);
       });
   }
 
@@ -50,16 +51,14 @@ public class WatchFeaturesRepository implements IWatchFeatures {
       return Future.failedFuture("Cannot persist null object!");
     }
 
-    JsonObject persitableJsonObject = new JsonObject();
-    persitableJsonObject.put("productType", watchFeatures.getProductType().name());
+    JsonObject query = new JsonObject().put("productType", watchFeatures.getProductType().name());
+
+    JsonObject update = new JsonObject();
     for (WatchFeature allFeatureTypes : watchFeatures.getWatchFeatures()) {
-      persitableJsonObject.put(allFeatureTypes.getFeatureName(), allFeatureTypes.getFeatures());
+      update.put(allFeatureTypes.getFeatureName(), allFeatureTypes.getFeatures());
     }
 
-    logger.info("Saving watch features /types: {}", watchFeatures);
-
-    return mongoClient.save(collectionName, persitableJsonObject)
-      .compose(idstr -> mongoClient.findOne(collectionName, new JsonObject().put("_id", idstr), null))
-      .map(res -> res != null ? true : false);
+    return mongoClient.updateCollection(collectionName, query, new JsonObject().put("$set", update))
+      .map(res -> res.getDocUpsertedId() != null);
   }
 }

@@ -6,7 +6,6 @@ import com.affiliation.product.repository.WatchFeature;
 import com.affiliation.product.repository.WatchFeatures;
 import io.netty.util.internal.StringUtil;
 import io.vertx.core.Future;
-import io.vertx.ext.web.RoutingContext;
 import java.util.Arrays;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -57,17 +56,16 @@ public class WatchFeaturesController {
     return this.watchFeaturesRepository.setWatchFeatures(watchFeatures);
   }
 
-  public Future<WatchFeature> getFeature(RoutingContext context) {
-    ProductType type = ProductType.fromValue(context.pathParam("productType"));
+  public Future<WatchFeature> getFeature(String productType, String featureName) {
+    ProductType type = ProductType.fromValue(productType);
     if (type == ProductType.NONE) {
-      return Future.failedFuture("ProductType unknown: " + context.pathParam("productType"));
+      return Future.failedFuture("ProductType unknown: " + productType);
     }
 
-    String fname = context.pathParam("featureName");
-    if (StringUtil.isNullOrEmpty(fname)) {
-      return Future.failedFuture("Feature Name is mandatory!");
+    if (StringUtil.isNullOrEmpty(featureName)) {
+      return Future.failedFuture("Feature Name path param is mandatory!");
     }
 
-    return this.watchFeaturesRepository.getWatchFeatures(type, fname);
+    return this.watchFeaturesRepository.getWatchFeatures(type, featureName);
   }
 }
