@@ -12,18 +12,20 @@ This directory contains the Docker Compose configuration to run the Vert.x appli
 The Docker Compose setup includes:
 
 1. **MongoDB** (`mongodb`):
-  - Image: `mongo:7.0`
-  - Port: `27017`
-  - Database: `productdb`
-  - Persistent volume for data storage
-  - Health check to ensure MongoDB is ready
+
+- Image: `mongo:7.0`
+- Port: `27017`
+- Database: `productdb`
+- Persistent volume for data storage
+- Health check to ensure MongoDB is ready
 
 2. **Vert.x Application** (`vertx-app`):
-  - Built from the Dockerfile in the parent directory
-  - Port: `8080`
-  - Depends on MongoDB service
-  - Environment variables for MongoDB connection
-  - Health check on the products API endpoint
+
+- Built from the Dockerfile in the parent directory
+- Port: `8080`
+- Depends on MongoDB service
+- Environment variables for MongoDB connection
+- Health check on the products API endpoint
 
 ## Usage
 
@@ -112,13 +114,6 @@ docker-compose logs vertx-app
 docker-compose logs mongodb
 ```
 
-### Check health:
-
-```bash
-docker-compose exec vertx-app curl -f http://localhost:8080/api/products
-docker-compose exec mongodb mongosh --eval "db.adminCommand('ping')"
-```
-
 ### Rebuild only the application:
 
 ```bash
@@ -139,4 +134,29 @@ npm run build
 
 ```bash
 mvn clean package -DskipTests
+```
+
+### Development Environment
+
+### Dev/Production Environment
+
+```bash
+docker-compose -f docker-compose.yml up -d
+docker-compose -f docker-compose_dev.yml up -d
+```
+
+## Stopping Services
+
+```bash
+# Development
+docker-compose -f docker-compose.yml down
+docker-compose -f docker-compose_dev.yml down
+
+
+## Viewing Logs
+
+```bash
+# Development
+docker-compose -f docker-compose.yml logs -f
+docker-compose -f docker-compose_dev.yml logs -f
 ```

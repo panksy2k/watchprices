@@ -4,6 +4,7 @@ import com.affiliation.product.utils.ProductSerializer;
 import com.affiliation.product.utils.Serde;
 import java.io.Serializable;
 import java.net.URL;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -29,14 +30,15 @@ public class SportsWatch extends Product implements Cloneable, Serializable {
   private List<String> supportedActivities;
   private Color color;
 
-  public SportsWatch(String id, String modelName, ProductPrice price, String desc, Map<String, URL> affiliateURL) {
-    super(id, modelName, price, ProductType.SPORTSWATCH, desc, affiliateURL);
+  public SportsWatch(String id, String modelName, ProductPrice price, String desc, Map<String, URL> affiliateURL,
+                     Instant creationDate, Instant modifiedDate) {
+    super(id, modelName, price, ProductType.SPORTSWATCH, desc, affiliateURL, creationDate, modifiedDate);
   }
 
   // Private constructor for Builder pattern
   private SportsWatch(Builder builder) {
     super(builder.id, builder.modelName, builder.price, ProductType.SPORTSWATCH, builder.description,
-      builder.affiliateMarketingDeepURL);
+      builder.affiliateMarketingDeepURL, builder.creationDate, builder.modifiedDate);
     this.dimension = builder.dimension;
     this.weight = builder.weight;
     this.displaySize = builder.displaySize;
@@ -293,6 +295,7 @@ public class SportsWatch extends Product implements Cloneable, Serializable {
     private List<String> thirdPartyIntegrationApps;
     private List<String> supportedActivities;
     private Color color;
+    private Instant creationDate, modifiedDate;
 
     public Builder() {
       // Initialize with defaults
@@ -417,6 +420,16 @@ public class SportsWatch extends Product implements Cloneable, Serializable {
 
     public Builder color(Color color) {
       this.color = color;
+      return this;
+    }
+
+    public Builder creationDate(Instant createDate) {
+      this.creationDate = createDate;
+      return this;
+    }
+
+    public Builder modifiedDate(Instant modifiedDate) {
+      this.modifiedDate = modifiedDate;
       return this;
     }
 

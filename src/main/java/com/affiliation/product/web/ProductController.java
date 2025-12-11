@@ -10,6 +10,8 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +55,11 @@ public class ProductController {
             if (Boolean.TRUE.equals(status)) {
               return Future.failedFuture("Product already exists");
             }
+
+            //Add creationDate and modifiedDate
+            jsonObject.put("creationDateTime", Instant.now(Clock.systemUTC()));
+            jsonObject.put("updateDateTime", Instant.now(Clock.systemUTC()));
+
             return productRepository.saveProduct(jsonObject, ptype);
           });
       }
@@ -146,6 +153,9 @@ public class ProductController {
       if (existJson == null) {
         return Future.failedFuture("Product not found!");
       }
+
+      toBeModified.put("updateDateTime", Instant.now(Clock.systemUTC()));
+
       return productRepository.saveProduct(toBeModified, contextProductType);
     });
   }

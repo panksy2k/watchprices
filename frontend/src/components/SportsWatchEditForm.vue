@@ -152,14 +152,56 @@
                             <div class="form-text">Enter sensors separated by commas</div>
                         </div>
                         <div class="mb-3">
-                            <label for="dailyFeatures" class="form-label fw-semibold">Daily Features</label>
-                            <input type="text" id="dailyFeatures" v-model="sportsWatch.dailyFeatures" class="form-control" placeholder="e.g., Sleep Tracking, Stress Monitoring, Weather (comma-separated)" />
-                            <div class="form-text">Enter features separated by commas</div>
+                            <label class="form-label fw-semibold">Daily Features</label>
+                            <div v-if="loadingDailyFeatures" class="text-muted">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Loading daily features...
+                            </div>
+                            <div v-else-if="dailyFeaturesError" class="alert alert-warning" role="alert">
+                                {{ dailyFeaturesError }}
+                            </div>
+                            <div v-else class="row">
+                                <div v-for="feature in availableDailyFeatures" :key="feature" class="col-md-6 mb-2">
+                                    <div class="form-check">
+                                        <input
+                                            :id="'dailyFeature-' + feature"
+                                            v-model="sportsWatch.dailyFeatures"
+                                            :value="feature"
+                                            class="form-check-input"
+                                            type="checkbox"
+                                        />
+                                        <label :for="'dailyFeature-' + feature" class="form-check-label">
+                                            {{ feature }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="mb-3">
-                            <label for="thirdPartyIntegrationApps" class="form-label fw-semibold">Third-Party Integration Apps</label>
-                            <input type="text" id="thirdPartyIntegrationApps" v-model="sportsWatch.thirdPartyIntegrationApps" class="form-control" placeholder="e.g., Strava, Spotify, Google Pay (comma-separated)" />
-                            <div class="form-text">Enter app names separated by commas</div>
+                            <label class="form-label fw-semibold">Third-Party Integration Apps</label>
+                            <div v-if="loadingThirdPartyApps" class="text-muted">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Loading third-party apps...
+                            </div>
+                            <div v-else-if="thirdPartyAppsError" class="alert alert-warning" role="alert">
+                                {{ thirdPartyAppsError }}
+                            </div>
+                            <div v-else class="row">
+                                <div v-for="app in availableThirdPartyApps" :key="app" class="col-md-6 mb-2">
+                                    <div class="form-check">
+                                        <input
+                                            :id="'thirdPartyApp-' + app"
+                                            v-model="sportsWatch.thirdPartyIntegrationApps"
+                                            :value="app"
+                                            class="form-check-input"
+                                            type="checkbox"
+                                        />
+                                        <label :for="'thirdPartyApp-' + app" class="form-check-label">
+                                            {{ app }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="supportedActivities" class="form-label fw-semibold">Supported Activities</label>
@@ -265,8 +307,8 @@ export default {
                 internalMemory: '',
                 hasDownloadableGlobalMaps: false,
                 dataTrackingSensors: '',
-                dailyFeatures: '',
-                thirdPartyIntegrationApps: '',
+                dailyFeatures: [],
+                thirdPartyIntegrationApps: [],
                 supportedActivities: '',
                 color: '',
                 affiliateMarketingDeepURLs: [
@@ -275,12 +317,73 @@ export default {
             },
             currencies: ['GBP', 'EUR', 'USD', 'CAD'],
             colors: ['BLACK', 'WHITE', 'RED', 'BLUE', 'GREEN', 'YELLOW', 'ORANGE', 'PURPLE', 'PINK', 'GREY'],
+            availableDailyFeatures: [],
+            loadingDailyFeatures: false,
+            dailyFeaturesError: null,
+            availableThirdPartyApps: [],
+            loadingThirdPartyApps: false,
+            thirdPartyAppsError: null,
         };
     },
     async mounted() {
+        this.fetchDailyFeatures();
+        this.fetchThirdPartyApps();
         await this.loadProductData();
     },
     methods: {
+        fetchDailyFeatures() {
+            this.loadingDailyFeatures = true;
+            this.dailyFeaturesError = null;
+
+            fetch('/api/products/SPORTSWATCH/watchFeatures/dailyFeatures', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch daily features');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Assuming the response is {"dailyFeatures": ["feature1", "feature2", ...]}
+                    this.availableDailyFeatures = [...new Set(data.dailyFeatures || [])];
+                    this.loadingDailyFeatures = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching daily features:', error);
+                    this.dailyFeaturesError = 'Failed to load daily features. Please try again later.';
+                    this.loadingDailyFeatures = false;
+                });
+        },
+        fetchThirdPartyApps() {
+            this.loadingThirdPartyApps = true;
+            this.thirdPartyAppsError = null;
+
+            fetch('/api/products/SPORTSWATCH/watchFeatures/thirdPartyIntegration', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch third-party apps');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    this.availableThirdPartyApps = [...new Set(data.thirdPartyIntegration || [])];
+                    this.loadingThirdPartyApps = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching third-party apps:', error);
+                    this.thirdPartyAppsError = 'Failed to load third-party apps. Please try again later.';
+                    this.loadingThirdPartyApps = false;
+                });
+        },
         async loadProductData() {
             try {
                 this.loading = true;
@@ -300,12 +403,14 @@ export default {
                     dataTrackingSensors: Array.isArray(productData.dataTrackingSensors) 
                         ? productData.dataTrackingSensors.join(', ') 
                         : productData.dataTrackingSensors || '',
+                    // Keep dailyFeatures as array for checkbox binding
                     dailyFeatures: Array.isArray(productData.dailyFeatures) 
-                        ? productData.dailyFeatures.join(', ') 
-                        : productData.dailyFeatures || '',
+                        ? productData.dailyFeatures 
+                        : [],
+                    // Keep thirdPartyIntegrationApps as array for checkbox binding
                     thirdPartyIntegrationApps: Array.isArray(productData.thirdPartyIntegrationApps) 
-                        ? productData.thirdPartyIntegrationApps.join(', ') 
-                        : productData.thirdPartyIntegrationApps || '',
+                        ? productData.thirdPartyIntegrationApps 
+                        : [],
                     supportedActivities: Array.isArray(productData.supportedActivities) 
                         ? productData.supportedActivities.join(', ') 
                         : productData.supportedActivities || '',
@@ -347,8 +452,8 @@ export default {
                 formData.affiliateMarketingDeepURL = affiliateMap;
                 delete formData.affiliateMarketingDeepURLs;
 
-                // Convert comma-separated strings to arrays
-                const arrayFields = ['dataTrackingSensors', 'dailyFeatures', 'thirdPartyIntegrationApps', 'supportedActivities'];
+                // Convert comma-separated strings to arrays (dailyFeatures and thirdPartyIntegrationApps are already arrays from checkboxes)
+                const arrayFields = ['dataTrackingSensors', 'supportedActivities'];
                 arrayFields.forEach(field => {
                     if (formData[field] && typeof formData[field] === 'string') {
                         formData[field] = formData[field].split(',').map(item => item.trim());

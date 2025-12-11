@@ -3,7 +3,7 @@
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h1 class="h2 text-primary mb-1">Sports Watch Collection</h1>
+          <h1 class="h2 text-primary mb-1">Sports Watch</h1>
           <small class="text-muted">
             <i class="bi bi-info-circle me-1"></i>
             Double-click on any watch card to edit
@@ -40,8 +40,8 @@
         </button>
       </div>
 
-      <!-- Empty State -->
-      <div v-else-if="!products.length" class="text-center py-5">
+      <!-- Empty State (only when no filters are active) -->
+      <div v-else-if="!products.length && !hasActiveFilters" class="text-center py-5">
         <div class="mb-4">
           <i class="bi bi-watch display-1 text-muted"></i>
         </div>
@@ -181,7 +181,19 @@
 
         <!-- Products Grid -->
         <div :class="filtersVisible ? 'col-lg-9 col-md-8' : 'col-12'">
-          <div class="row g-4">
+          <!-- No Results Message -->
+          <div v-if="filteredProducts.length === 0 && hasActiveFilters" class="text-center py-5">
+            <div class="mb-4">
+              <i class="bi bi-search display-1 text-muted"></i>
+            </div>
+            <h3 class="text-muted">No Watches Match Your Filters</h3>
+            <p class="text-muted">Try adjusting your filter criteria or clear the filters to see all watches.</p>
+            <button class="btn btn-primary" @click="clearFilters">
+              <i class="bi bi-x-circle me-1"></i> Clear Filters
+            </button>
+          </div>
+          <!-- Products List -->
+          <div v-else class="row g-4">
             <div v-for="product in filteredProducts" :key="product.id" class="col-xl-4 col-lg-6">
               <div
                 class="card h-100 shadow-sm product-card"
@@ -343,7 +355,7 @@
 
       <!-- Disclaimer Footer -->
       <div class="mt-5 pt-4 border-top text-muted small disclaimer-footer">
-        <p>Last updated at {{ lastUpdated }}. As an Amazon Associate I earn from qualifying purchases. Product prices and availability are accurate as of the date/time indicated and are subject to change. Any price and availability information displayed at the time of purchase will apply to the purchase of the product. CERTAIN CONTENT THAT APPEARS ON THIS SITE COMES FROM AMAZON SERVICES LLC. THIS CONTENT IS PROVIDED 'AS IS' AND IS SUBJECT TO CHANGE OR REMOAL AT ANY TIME. All rights reserved.</p>
+        <p>Last updated at {{ lastUpdated }}. This site may earn commissions from qualifying purchases made through affiliate links. Product information, prices, and availability are accurate as of the date/time indicated and are subject to change. Any price and availability information displayed on linked sites at the time of purchase will apply to the purchase of the product. Product content is provided by third-party vendors and may be subject to change or removal at any time. All rights reserved.</p>
       </div>
     </div>
   </div>
@@ -489,7 +501,7 @@ export default {
         }
         this[optionsProperty] = values
           .filter(value => value && value.trim())
-          .map(value => ({ value, label: value }))
+          .map(value => ({value, label: value}))
       } catch (error) {
         console.error(`Error fetching ${attributeName} options:`, error)
         this[optionsProperty] = []
@@ -570,7 +582,7 @@ export default {
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ criterias })
+            body: JSON.stringify({criterias})
           }
         )
 
@@ -598,6 +610,11 @@ export default {
 
         // Force Vue to update
         this.$forceUpdate()
+
+        // Automatically show filters if no results found
+        if (this.products.length === 0 && this.hasActiveFilters) {
+          this.filtersVisible = true
+        }
       } catch (error) {
         console.error('Error fetching filtered products:', error)
         this.error = error.message || 'Failed to apply filters'

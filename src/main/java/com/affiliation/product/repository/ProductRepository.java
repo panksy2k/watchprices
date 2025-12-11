@@ -36,6 +36,7 @@ public class ProductRepository<T extends Product> implements IProductRepository<
 
     if (productType == sportsWatchProductType) {
       logger.info("Saving product of type: {}", productType);
+      //product
       return mongoClient.save(sportsWatchProductType.name(), product);
     }
 
