@@ -51,14 +51,29 @@ public class WatchFeaturesRepository implements IWatchFeatures {
       return Future.failedFuture("Cannot persist null object!");
     }
 
-    JsonObject query = new JsonObject().put("productType", watchFeatures.getProductType().name());
+    return mongoClient.findOne(collectionName,
+        new JsonObject().put("productType", watchFeatures.getProductType().name()), null)
+      .compose(existObj -> {
+        if (existObj == null) {
+          JsonObject newObj = new JsonObject().put("productType", watchFeatures.getProductType().name());
+          for (WatchFeature allFeatureTypes : watchFeatures.getWatchFeatures()) {
+            newObj.put(allFeatureTypes.getFeatureName(), allFeatureTypes.getFeatures());
+          }
 
-    JsonObject update = new JsonObject();
-    for (WatchFeature allFeatureTypes : watchFeatures.getWatchFeatures()) {
-      update.put(allFeatureTypes.getFeatureName(), allFeatureTypes.getFeatures());
-    }
+          logger.info("Persisting new object: {}", newObj);
+          return mongoClient.save(collectionName, newObj).map(id -> id != null);
+        } else {
+          JsonObject updateObj = new JsonObject();
 
-    return mongoClient.updateCollection(collectionName, query, new JsonObject().put("$set", update))
-      .map(res -> res.getDocUpsertedId() != null);
+          for (WatchFeature allFeatureTypes : watchFeatures.getWatchFeatures()) {
+            updateObj.put(allFeatureTypes.getFeatureName(), allFeatureTypes.getFeatures());
+          }
+
+          logger.info("Updating existing watch features in documents!");
+          return mongoClient.updateCollection(collectionName,
+            new JsonObject().put("productType", watchFeatures.getProductType().name()),
+            new JsonObject().put("$set", updateObj)).map(res -> res.getDocUpsertedId() != null);
+        }
+      });
   }
 }
