@@ -355,7 +355,11 @@
 
       <!-- Disclaimer Footer -->
       <div class="mt-5 pt-4 border-top text-muted small disclaimer-footer">
-        <p>Last updated at {{ lastUpdated }}. This site may earn commissions from qualifying purchases made through affiliate links. Product information, prices, and availability are accurate as of the date/time indicated and are subject to change. Any price and availability information displayed on linked sites at the time of purchase will apply to the purchase of the product. Product content is provided by third-party vendors and may be subject to change or removal at any time. All rights reserved.</p>
+        <p>Last updated at {{ lastUpdated }}. This site may earn commissions from qualifying purchases made through
+          affiliate links. Product information, prices, and availability are accurate as of the date/time indicated and
+          are subject to change. Any price and availability information displayed on linked sites at the time of
+          purchase will apply to the purchase of the product. Product content is provided by third-party vendors and may
+          be subject to change or removal at any time. All rights reserved.</p>
       </div>
     </div>
   </div>
@@ -627,7 +631,7 @@ export default {
       if (!price || typeof price.cost !== 'number') return 'N/A'
       return price.cost.toLocaleString('en-US', {
         style: 'currency',
-        currency: price.currency || 'USD',
+        currency: price.productCurrency || 'USD',
         minimumFractionDigits: 0
       })
     },
