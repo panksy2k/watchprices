@@ -104,10 +104,10 @@ public class MainVerticle extends AbstractVerticle {
 
     vertx.createHttpServer()
       .requestHandler(router)
-      .listen(8080, http -> {
+      .listen(80, http -> {
         if (http.succeeded()) {
-          logger.info("HTTP server started on port 8080");
-          logger.info("Vue.js app available at: http://localhost:8080");
+          logger.info("HTTP server started on port 80");
+          logger.info("Vue.js app available at: http://localhost:80");
 
           // Initialize watch features data after MongoDB is ready
           watchFeaturesController.putWatchFeatures()
