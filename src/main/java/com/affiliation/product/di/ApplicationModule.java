@@ -21,11 +21,15 @@ import com.google.inject.Singleton;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Guice module for dependency injection configuration
  */
 public class ApplicationModule extends AbstractModule {
+  private static final Logger logger = LoggerFactory.getLogger(ApplicationModule.class);
+
   private static final String PRODUCT_SPORTS_WATCH_COLLECTION = "SPORTSWATCH";
   private static final String USER_COLLECTION = "USER";
   private static final String WATCH_FEATURES = "WatchFeatures";
@@ -70,6 +74,42 @@ public class ApplicationModule extends AbstractModule {
       } else {
         System.out.println("Failed to create collection " + USER_COLLECTION);
         h.cause().printStackTrace();
+      }
+    });
+
+    JsonObject batteryLifeDailyUse = new JsonObject().put("productType", 1).put("batteryLifeDailyUse", 1);
+    JsonObject screenMaterial = new JsonObject().put("productType", 1).put("screenMaterial", 1);
+    JsonObject internalMemory = new JsonObject().put("productType", 1).put("internalMemory", 1);
+    JsonObject chargingTime = new JsonObject().put("productType", 1).put("chargingTime", 1);
+    JsonObject waterResistance = new JsonObject().put("productType", 1).put("waterResistance", 1);
+
+    mc.createIndex(PRODUCT_SPORTS_WATCH_COLLECTION, batteryLifeDailyUse, h -> {
+      if (h.succeeded()) {
+        logger.info("Created index on batteryLifeDailyUse (and productType)");
+      }
+    });
+
+    mc.createIndex(PRODUCT_SPORTS_WATCH_COLLECTION, screenMaterial, h -> {
+      if (h.succeeded()) {
+        logger.info("Created index on screenMaterial (and productType)");
+      }
+    });
+
+    mc.createIndex(PRODUCT_SPORTS_WATCH_COLLECTION, internalMemory, h -> {
+      if (h.succeeded()) {
+        logger.info("Created index on internalMemory (and productType)");
+      }
+    });
+
+    mc.createIndex(PRODUCT_SPORTS_WATCH_COLLECTION, chargingTime, h -> {
+      if (h.succeeded()) {
+        logger.info("Created index on chargingTime (and productType)");
+      }
+    });
+
+    mc.createIndex(PRODUCT_SPORTS_WATCH_COLLECTION, waterResistance, h -> {
+      if (h.succeeded()) {
+        logger.info("Created index on waterResistance (and productType)");
       }
     });
 
