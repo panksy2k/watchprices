@@ -204,9 +204,30 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="supportedActivities" class="form-label fw-semibold">Supported Activities</label>
-                            <input type="text" id="supportedActivities" v-model="sportsWatch.supportedActivities" class="form-control" placeholder="e.g., Running, Cycling, Swimming, Golf (comma-separated)" />
-                            <div class="form-text">Enter activities separated by commas</div>
+                            <label class="form-label fw-semibold">Supported Activities</label>
+                            <div v-if="loadingSupportedActivities" class="text-muted">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Loading supported activities...
+                            </div>
+                            <div v-else-if="supportedActivitiesError" class="alert alert-warning" role="alert">
+                                {{ supportedActivitiesError }}
+                            </div>
+                            <div v-else class="row">
+                                <div v-for="activity in availableSupportedActivities" :key="activity" class="col-md-6 mb-2">
+                                    <div class="form-check">
+                                        <input
+                                            :id="'supportedActivity-' + activity"
+                                            v-model="sportsWatch.supportedActivities"
+                                            :value="activity"
+                                            class="form-check-input"
+                                            type="checkbox"
+                                        />
+                                        <label :for="'supportedActivity-' + activity" class="form-check-label">
+                                            {{ activity }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -309,7 +330,7 @@ export default {
                 dataTrackingSensors: '',
                 dailyFeatures: [],
                 thirdPartyIntegrationApps: [],
-                supportedActivities: '',
+                supportedActivities: [],
                 color: '',
                 affiliateMarketingDeepURLs: [
                     { partner: '', url: '' }
@@ -323,11 +344,15 @@ export default {
             availableThirdPartyApps: [],
             loadingThirdPartyApps: false,
             thirdPartyAppsError: null,
+            availableSupportedActivities: [],
+            loadingSupportedActivities: false,
+            supportedActivitiesError: null,
         };
     },
     async mounted() {
         this.fetchDailyFeatures();
         this.fetchThirdPartyApps();
+        this.fetchSupportedActivities();
         await this.loadProductData();
     },
     methods: {
@@ -384,6 +409,32 @@ export default {
                     this.loadingThirdPartyApps = false;
                 });
         },
+        fetchSupportedActivities() {
+            this.loadingSupportedActivities = true;
+            this.supportedActivitiesError = null;
+
+            fetch('/api/products/SPORTSWATCH/watchFeatures/supportedActivities', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch supported activities');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    this.availableSupportedActivities = [...new Set(data.supportedActivities || [])];
+                    this.loadingSupportedActivities = false;
+                })
+                .catch(error => {
+                    console.error('Error fetching supported activities:', error);
+                    this.supportedActivitiesError = 'Failed to load supported activities. Please try again later.';
+                    this.loadingSupportedActivities = false;
+                });
+        },
         async loadProductData() {
             try {
                 this.loading = true;
@@ -411,9 +462,10 @@ export default {
                     thirdPartyIntegrationApps: Array.isArray(productData.thirdPartyIntegrationApps) 
                         ? productData.thirdPartyIntegrationApps 
                         : [],
+                    // Keep supportedActivities as array for checkbox binding
                     supportedActivities: Array.isArray(productData.supportedActivities) 
-                        ? productData.supportedActivities.join(', ') 
-                        : productData.supportedActivities || '',
+                        ? productData.supportedActivities 
+                        : [],
                     // Convert affiliate marketing URLs from Map to array format for form
                     affiliateMarketingDeepURLs: productData.affiliateMarketingDeepURL 
                         ? Object.entries(productData.affiliateMarketingDeepURL).map(([partner, url]) => ({ partner, url }))
@@ -452,8 +504,8 @@ export default {
                 formData.affiliateMarketingDeepURL = affiliateMap;
                 delete formData.affiliateMarketingDeepURLs;
 
-                // Convert comma-separated strings to arrays (dailyFeatures and thirdPartyIntegrationApps are already arrays from checkboxes)
-                const arrayFields = ['dataTrackingSensors', 'supportedActivities'];
+                // Convert comma-separated strings to arrays (dailyFeatures, thirdPartyIntegrationApps, and supportedActivities are already arrays from checkboxes)
+                const arrayFields = ['dataTrackingSensors'];
                 arrayFields.forEach(field => {
                     if (formData[field] && typeof formData[field] === 'string') {
                         formData[field] = formData[field].split(',').map(item => item.trim());

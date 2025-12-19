@@ -51,7 +51,34 @@ public class WatchFeaturesController {
         "Komoot",
         "Final Surge").toList());
 
-    watchFeatures.setWatchFeatures(Arrays.asList(dailyFeature, thirdParty));
+    WatchFeature supportedActivities = new WatchFeature("supportedActivities",
+      Stream.of("Run",
+        "Indoor Run",
+        "Track Run",
+        "Trail Run",
+        "Bike",
+        "Indoor Bike",
+        "Pool Swim",
+        "Open Water Swim",
+        "Flatwater",
+        "Whitewater",
+        "Rowing",
+        "Indoor Rower",
+        "Windsurfing",
+        "Speedsurfing",
+        "Ski",
+        "XC Ski",
+        "Snowboard",
+        "Hike",
+        "Mountain Climb",
+        "Floor Climb",
+        "Indoor Climb",
+        "Bouldering",
+        "Gym Cardio",
+        "Strength",
+        "Multisport").toList());
+
+    watchFeatures.setWatchFeatures(Arrays.asList(dailyFeature, thirdParty, supportedActivities));
 
     return this.watchFeaturesRepository.setWatchFeatures(watchFeatures);
   }
