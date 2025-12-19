@@ -158,6 +158,44 @@
                 </select>
               </div>
 
+              <!-- Supported Activities Filter -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Supported Activities</label>
+                <select
+                  v-model="selectedSupportedActivities"
+                  :disabled="loadingFilters"
+                  class="form-select form-select-sm"
+                >
+                  <option value="">{{ loadingFilters ? 'Loading...' : 'All' }}</option>
+                  <option
+                    v-for="option in supportedActivitiesOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Daily Features Filter -->
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Daily Features</label>
+                <select
+                  v-model="selectedDailyFeatures"
+                  :disabled="loadingFilters"
+                  class="form-select form-select-sm"
+                >
+                  <option value="">{{ loadingFilters ? 'Loading...' : 'All' }}</option>
+                  <option
+                    v-for="option in dailyFeaturesOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+              </div>
+
               <!-- Filter Actions -->
               <div class="d-grid gap-2">
                 <button
@@ -385,6 +423,10 @@ export default {
       screenMaterialOptions: [],
       selectedBatteryLifeDailyUse: '',
       batteryLifeDailyUseOptions: [],
+      selectedSupportedActivities: '',
+      supportedActivitiesOptions: [],
+      selectedDailyFeatures: '',
+      dailyFeaturesOptions: [],
       loadingFilters: false,
       filterDebounceTimer: null,
       lastUpdated: null
@@ -400,7 +442,9 @@ export default {
         this.selectedChargingTime !== '' ||
         this.selectedInternalMemory !== '' ||
         this.selectedScreenMaterial !== '' ||
-        this.selectedBatteryLifeDailyUse !== ''
+        this.selectedBatteryLifeDailyUse !== '' ||
+        this.selectedSupportedActivities !== '' ||
+        this.selectedDailyFeatures !== ''
     },
     averagePrice() {
       if (!this.filteredProducts.length) return 0
@@ -432,6 +476,12 @@ export default {
       this.applyFilters()
     },
     selectedBatteryLifeDailyUse() {
+      this.applyFilters()
+    },
+    selectedSupportedActivities() {
+      this.applyFilters()
+    },
+    selectedDailyFeatures() {
       this.applyFilters()
     }
   },
@@ -479,7 +529,9 @@ export default {
           this.fetchAttributeOptions('chargingTime', 'chargingTimeOptions'),
           this.fetchAttributeOptions('internalMemory', 'internalMemoryOptions'),
           this.fetchAttributeOptions('screenMaterial', 'screenMaterialOptions'),
-          this.fetchAttributeOptions('batteryLifeDailyUse', 'batteryLifeDailyUseOptions')
+          this.fetchAttributeOptions('batteryLifeDailyUse', 'batteryLifeDailyUseOptions'),
+          this.fetchAttributeOptions('supportedActivities', 'supportedActivitiesOptions'),
+          this.fetchAttributeOptions('dailyFeatures', 'dailyFeaturesOptions')
         ])
       } catch (error) {
         console.error('Error fetching filter options:', error)
@@ -561,6 +613,22 @@ export default {
         criterias.push({
           col: 'batteryLifeDailyUse',
           val: [this.selectedBatteryLifeDailyUse],
+          op: 'IN'
+        })
+      }
+
+      if (this.selectedSupportedActivities) {
+        criterias.push({
+          col: 'supportedActivities',
+          val: [this.selectedSupportedActivities],
+          op: 'IN'
+        })
+      }
+
+      if (this.selectedDailyFeatures) {
+        criterias.push({
+          col: 'dailyFeatures',
+          val: [this.selectedDailyFeatures],
           op: 'IN'
         })
       }
@@ -673,6 +741,8 @@ export default {
       this.selectedInternalMemory = ''
       this.selectedScreenMaterial = ''
       this.selectedBatteryLifeDailyUse = ''
+      this.selectedSupportedActivities = ''
+      this.selectedDailyFeatures = ''
       this.fetchProducts()
     }
   }
