@@ -55,7 +55,7 @@ public class MainVerticle extends AbstractVerticle {
 
     String serverKeyStore = System.getProperty("SERVER_KEYSTORE_PATH",
       "/Users/pankajpardasani/Documents/watchprices-certificates/server.p12");
-    String serverKeyStoreSecret = System.getProperty("SERVER_KEYSTORE_SECREAT", "secret");
+    String serverKeyStoreSecret = System.getProperty("SERVER_KEYSTORE_SECRET", "secret");
 
     JsonObject mongoConfig = new JsonObject()
       .put("connection_string", mongoConnectionString)

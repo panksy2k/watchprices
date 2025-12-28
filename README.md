@@ -134,6 +134,7 @@ npm run build
 
 ```bash
 mvn clean package -DskipTests
+mvn -q -Dvertx.jvmArgs="-DSERVER_KEYSTORE_PATH=/Users/pankajpardasani/Documents/watchprices-certificates/server.p12 -DSERVER_KEYSTORE_SECREAT=secret" vertx:run
 ```
 
 ### Development Environment
