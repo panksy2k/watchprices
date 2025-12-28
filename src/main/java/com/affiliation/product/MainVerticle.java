@@ -10,8 +10,10 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.net.PfxOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
@@ -43,13 +45,17 @@ public class MainVerticle extends AbstractVerticle {
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
     // Use environment variables for MongoDB connection, fallback to localhost for development
-    String mongoHost = System.getenv().getOrDefault("MONGO_HOST", "localhost");
-    String mongoPort = System.getenv().getOrDefault("MONGO_PORT", "27017");
-    String mongoDatabase = System.getenv().getOrDefault("MONGO_DATABASE", "productdb");
-    String mongoConnectionString = System.getenv().getOrDefault(
+    String mongoHost = System.getProperty("MONGO_HOST", "localhost");
+    String mongoPort = System.getProperty("MONGO_PORT", "27017");
+    String mongoDatabase = System.getProperty("MONGO_DATABASE", "productdb");
+    String mongoConnectionString = System.getProperty(
       "MONGO_CONNECTION_STRING",
       "mongodb://" + mongoHost + ":" + mongoPort
     );
+
+    String serverKeyStore = System.getProperty("SERVER_KEYSTORE_PATH",
+      "/Users/pankajpardasani/Documents/watchprices-certificates/server.p12");
+    String serverKeyStoreSecret = System.getProperty("SERVER_KEYSTORE_SECREAT", "secret");
 
     JsonObject mongoConfig = new JsonObject()
       .put("connection_string", mongoConnectionString)
@@ -102,12 +108,20 @@ public class MainVerticle extends AbstractVerticle {
     });
     logger.info("Static file handler configured for webroot");
 
-    vertx.createHttpServer()
+    HttpServerOptions options = new HttpServerOptions()
+      .setSsl(true)
+      .setPfxKeyCertOptions(new PfxOptions()
+        .setPath(serverKeyStore)
+        .setPassword(serverKeyStoreSecret))
+      .setPort(443)
+      .setHost("0.0.0.0");
+
+    vertx.createHttpServer(options)
       .requestHandler(router)
-      .listen(80, http -> {
-        if (http.succeeded()) {
-          logger.info("HTTP server started on port 80");
-          logger.info("Vue.js app available at: http://localhost:80");
+      .listen(ar -> {
+        if (ar.succeeded()) {
+          logger.info("HTTPS server started on port {}", options.getPort());
+          logger.info("Vue.js app available at: https://localhost:" + options.getPort());
 
           // Initialize watch features data after MongoDB is ready
           watchFeaturesController.putWatchFeatures()
@@ -116,8 +130,8 @@ public class MainVerticle extends AbstractVerticle {
 
           startPromise.complete();
         } else {
-          startPromise.fail(http.cause());
-          logger.error("Failed to start HTTP server", http.cause());
+          startPromise.fail(ar.cause());
+          logger.error("Failed to start HTTPS server", ar.cause());
         }
       });
   }

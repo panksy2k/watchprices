@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: http://www.watchprices.de/sitemap.xml
+Sitemap: https://www.watchprices.de/sitemap.xml
