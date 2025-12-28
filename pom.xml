@@ -175,6 +175,14 @@
         <configuration>
           <redeploy>true</redeploy>
           <verticle>com.affiliation.product.MainVerticle</verticle>
+          <jvmArgs>
+            <jvmArg>-DMONGO_HOST=${MONGO_HOST}</jvmArg>
+            <jvmArg>-DMONGO_PORT=${MONGO_PORT}</jvmArg>
+            <jvmArg>-DMONGO_DATABASE=${MONGO_DATABASE}</jvmArg>
+            <jvmArg>-DMONGO_CONNECTION_STRING=${MONGO_CONNECTION_STRING}</jvmArg>
+            <jvmArg>-DSERVER_KEYSTORE_PATH=${SERVER_KEYSTORE_PATH}</jvmArg>
+            <jvmArg>-DSERVER_KEYSTORE_SECRET=${SERVER_KEYSTORE_SECRET}</jvmArg>
+          </jvmArgs>
         </configuration>
       </plugin>
       <plugin>
