@@ -18,6 +18,7 @@
         dest: "{{ project_dir }}"
         version: main
         update: yes
+        force: yes
       ignore_errors: no
 
     - name: Git pull origin main
