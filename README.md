@@ -134,12 +134,22 @@ npm run build
 
 ```bash
 mvn clean package -DskipTests
-mvn -q -Dvertx.jvmArgs="-DSERVER_KEYSTORE_PATH=/Users/pankajpardasani/Documents/watchprices-certificates/server.p12 -DSERVER_KEYSTORE_SECREAT=secret" vertx:run
+
+nohup mvn -DSERVER_KEYSTORE_PATH=/root/Projects/certificates/server.p12 -DMONGO_HOST=localhost -DMONGO_PORT=27017 -DMONGO_DATABASE=productdb -DSERVER_KEYSTORE_SECRET=secret -DMONGO_CONNECTION_STRING=mongodb://localhost:27017 vertx:run &
+nohup mvn exec:java &
 ```
+
+### and then run the MainVerticle
 
 ### Development Environment
 
 ### Dev/Production Environment
+
+```bash
+nohup mvn -DSERVER_KEYSTORE_PATH=/root/Projects/certificates/server.p12 -DMONGO_HOST=localhost -DMONGO_PORT=27017 -DMONGO_DATABASE=productdb -DSERVER_KEYSTORE_SECRET=secret -DMONGO_CONNECTION_STRING=mongodb://localhost:27017 vertx:run &
+nohup mvn exec:java &
+ansible-playbook -i ansible/inventory.ini ansible/deploy-watchprices.yml
+```
 
 ```bash
 docker-compose -f docker-compose.yml up -d
@@ -161,3 +171,5 @@ docker-compose -f docker-compose_dev.yml down
 docker-compose -f docker-compose.yml logs -f
 docker-compose -f docker-compose_dev.yml logs -f
 ```
+
+ansible-playbook -i ansible/inventory.ini ansible/deploy-watchprices.yml
