@@ -13,6 +13,7 @@ import com.affiliation.product.web.Auth;
 import com.affiliation.product.web.AuthController;
 import com.affiliation.product.web.IToken;
 import com.affiliation.product.web.ProductController;
+import com.affiliation.product.web.ProductPricePublisher;
 import com.affiliation.product.web.TokenService;
 import com.affiliation.product.web.WatchFeaturesController;
 import com.google.inject.AbstractModule;
@@ -162,5 +163,11 @@ public class ApplicationModule extends AbstractModule {
   @Singleton
   public WatchFeaturesController provideWatchFeaturesController(IWatchFeatures watchFeaturesRepository) {
     return new WatchFeaturesController(watchFeaturesRepository);
+  }
+
+  @Provides
+  @Singleton
+  public ProductPricePublisher provideProductPricePublisher(ProductRepository<Product> productRepository) {
+    return new ProductPricePublisher(productRepository);
   }
 }

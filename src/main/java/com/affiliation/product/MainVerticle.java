@@ -1,8 +1,10 @@
 package com.affiliation.product;
 
 import com.affiliation.product.di.ApplicationModule;
+import com.affiliation.product.repository.ProductType;
 import com.affiliation.product.web.Auth;
 import com.affiliation.product.web.ProductController;
+import com.affiliation.product.web.ProductPricePublisher;
 import com.affiliation.product.web.WatchFeaturesController;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -27,6 +29,7 @@ public class MainVerticle extends AbstractVerticle {
   private ProductController productController;
   private Auth authController;
   private WatchFeaturesController watchFeaturesController;
+  private ProductPricePublisher productPricePublisher;
 
   public static void main(String[] args) {
     Vertx vertx = Vertx.vertx();
@@ -48,10 +51,8 @@ public class MainVerticle extends AbstractVerticle {
     String mongoHost = System.getProperty("MONGO_HOST", "localhost");
     String mongoPort = System.getProperty("MONGO_PORT", "27017");
     String mongoDatabase = System.getProperty("MONGO_DATABASE", "productdb");
-    String mongoConnectionString = System.getProperty(
-      "MONGO_CONNECTION_STRING",
-      "mongodb://" + mongoHost + ":" + mongoPort
-    );
+    String mongoConnectionString =
+      System.getProperty("MONGO_CONNECTION_STRING", "mongodb://" + mongoHost + ":" + mongoPort);
 
     String serverKeyStore = System.getProperty("SERVER_KEYSTORE_PATH",
       "/Users/pankajpardasani/Documents/watchprices-certificates/server.p12");
@@ -78,6 +79,10 @@ public class MainVerticle extends AbstractVerticle {
     // Inject WatchFeaturesController
     watchFeaturesController = injector.getInstance(WatchFeaturesController.class);
     logger.info("WatchFeaturesController initialized successfully");
+
+    productPricePublisher = injector.getInstance(ProductPricePublisher.class);
+    setupPriceRefresh(productPricePublisher);
+    logger.info("ProductPricePublisher initialized successfully for background price refresh!");
 
     Router router = Router.router(vertx);
 
@@ -134,6 +139,12 @@ public class MainVerticle extends AbstractVerticle {
           logger.error("Failed to start HTTPS server", ar.cause());
         }
       });
+  }
+
+  private void setupPriceRefresh(ProductPricePublisher productPricePublisher) {
+    vertx.setPeriodic(2L, 10_000, h -> {
+      productPricePublisher.publishPriceUpdate(ProductType.SPORTSWATCH, getVertx());
+    });
   }
 
   private void setupProductRoutes(Router router) {

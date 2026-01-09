@@ -143,13 +143,21 @@ nohup mvn exec:java &
 
 ### Development Environment
 
-### Dev/Production Environment
+### Production - Deployment + Run
 
 ```bash
 nohup mvn -DSERVER_KEYSTORE_PATH=/root/Projects/certificates/server.p12 -DMONGO_HOST=localhost -DMONGO_PORT=27017 -DMONGO_DATABASE=productdb -DSERVER_KEYSTORE_SECRET=secret -DMONGO_CONNECTION_STRING=mongodb://localhost:27017 vertx:run &
-nohup mvn exec:java &
 ansible-playbook -i ansible/inventory.ini ansible/deploy-watchprices.yml
 ```
+
+### Dev Environment - Deployment + Run
+
+```bash
+source .env.local && nohup mvn exec:java &
+source .env.local && mvn vertx:run
+```
+
+## Using Docker
 
 ```bash
 docker-compose -f docker-compose.yml up -d
